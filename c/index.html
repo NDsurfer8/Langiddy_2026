@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+<title>Langiddy</title>
+<meta name="description" content="Chat with a friend on Langiddy — write in your language, they read it in theirs." />
+<meta name="robots" content="noindex, nofollow" />
+<meta name="referrer" content="no-referrer" />
+<meta property="og:title" content="You're invited to chat on Langiddy" />
+<meta property="og:description" content="Write in your language. They read it in theirs. No download needed." />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#fbf8f4" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#0a0a0c" media="(prefers-color-scheme: dark)" />
+<meta name="color-scheme" content="light dark" />
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23F0801E'/%3E%3Cstop offset='1' stop-color='%23F4A93C'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='url(%23g)'/%3E%3Crect x='16' y='14' width='20' height='64' rx='10' fill='%23fff'/%3E%3Cpath d='M53 52 H77 A9 9 0 0 1 86 61 V69 A9 9 0 0 1 77 78 H44 V61 A9 9 0 0 1 53 52 Z' fill='%23fff'/%3E%3Ccircle cx='56' cy='65' r='3.2' fill='%23F2882B'/%3E%3Ccircle cx='65' cy='65' r='3.2' fill='%23F2882B'/%3E%3Ccircle cx='74' cy='65' r='3.2' fill='%23F2882B'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --bg: #fbf8f4;
+    --surface: #ffffff;
+    --surface-2: #f3eee8;
+    --bubble-them: #efe9e2;
+    --text: #1b1a1f;
+    --text-soft: #5d5a63;
+    --text-faint: #8d8a93;
+    --orange: #f4751f;
+    --orange-deep: #d8631a;
+    --gold: #f4a93c;
+    --orange-tint: rgba(244, 117, 31, 0.12);
+    --danger: #c4492f;
+    --line: rgba(20, 18, 24, 0.10);
+    --grad: linear-gradient(135deg, #f4751f, #f6a83a);
+    --shadow-glow: 0 18px 44px -24px rgba(244, 117, 31, 0.55);
+    --shadow-card: 0 14px 36px -24px rgba(30, 20, 10, 0.35);
+    --chat-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    --ui-font: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    --head-font: "Bricolage Grotesque", "Figtree", -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0c;
+      --surface: #16171c;
+      --surface-2: #1f2027;
+      --bubble-them: #1e1f25;
+      --text: #f6f4f1;
+      --text-soft: #a6a4ac;
+      --text-faint: #6c6a73;
+      --orange-tint: rgba(244, 117, 31, 0.16);
+      --danger: #ff8a70;
+      --line: rgba(255, 255, 255, 0.09);
+      --shadow-card: 0 16px 40px -26px rgba(0, 0, 0, 0.8);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: var(--ui-font);
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  button, input, textarea { font: inherit; color: inherit; }
+  a { color: inherit; }
+  h1, h2 { font-family: var(--head-font); letter-spacing: -0.02em; line-height: 1.12; margin: 0; font-weight: 800; }
+  p { margin: 0; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+
+  /* The app box follows the *visual* viewport so the composer stays above the iOS keyboard. */
+  #app {
+    position: fixed;
+    left: 0; right: 0;
+    top: var(--app-top, 0px);
+    height: 100vh;
+    height: var(--app-h, 100dvh);
+    display: flex;
+    flex-direction: column;
+  }
+  .screen {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  .scroll-screen {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: calc(env(safe-area-inset-top) + 28px) calc(env(safe-area-inset-right) + 20px) calc(env(safe-area-inset-bottom) + 28px) calc(env(safe-area-inset-left) + 20px);
+  }
+  .center-col { width: 100%; max-width: 440px; margin: auto; }
+
+  .mark { width: 1em; height: 1em; flex: none; display: block; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-family: var(--head-font); font-weight: 800; font-size: 1.2rem; letter-spacing: -0.02em; text-decoration: none; }
+  .brand .mark { width: 30px; height: 30px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font-size: 1.05rem; font-weight: 600; min-height: 52px;
+    padding: 13px 24px; border-radius: 999px; border: 1.5px solid transparent;
+    cursor: pointer; text-decoration: none; width: 100%;
+    transition: transform .15s ease, filter .15s ease, opacity .15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-primary { background: var(--grad); color: #fff; box-shadow: var(--shadow-glow); }
+  .btn-primary:active { transform: scale(.98); }
+  .btn-primary[disabled] { opacity: .6; cursor: default; }
+  .btn-ghost { background: transparent; border-color: var(--line); }
+  .btn + .btn { margin-top: 12px; }
+
+  .spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--orange-tint); border-top-color: var(--orange); animation: spin .8s linear infinite; }
+  .btn .spinner { width: 20px; height: 20px; border-width: 2.5px; border-color: rgba(255,255,255,.35); border-top-color: #fff; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* loading */
+  #screen-loading { align-items: center; justify-content: center; gap: 18px; color: var(--text-soft); }
+  #screen-loading .mark { width: 56px; height: 56px; }
+
+  /* error / invalid */
+  .state-ico { width: 64px; height: 64px; border-radius: 20px; display: grid; place-items: center; font-size: 1.9rem; background: var(--orange-tint); margin: 0 auto 22px; }
+  .state h1 { font-size: 1.7rem; text-align: center; }
+  .state p { color: var(--text-soft); text-align: center; margin: 12px 0 28px; font-size: 1.05rem; }
+  .state .brand { margin: 0 auto 36px; display: flex; width: max-content; }
+
+  /* join */
+  .join-head { text-align: center; margin-bottom: 28px; }
+  .avatar {
+    width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 18px;
+    display: grid; place-items: center; background: var(--grad); color: #fff;
+    font-family: var(--head-font); font-weight: 800; font-size: 1.9rem; box-shadow: var(--shadow-glow);
+  }
+  .join-head h1 { font-size: clamp(1.6rem, 6.4vw, 2rem); overflow-wrap: anywhere; }
+  .join-head p { color: var(--text-soft); margin-top: 12px; font-size: 1.06rem; overflow-wrap: anywhere; }
+  .field { margin-bottom: 18px; }
+  .field label, .field .label { display: block; font-weight: 600; font-size: .95rem; margin-bottom: 8px; }
+  .input, .picker-btn {
+    width: 100%; min-height: 54px; font-size: 17px; /* ≥16px stops iOS zoom */
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 16px;
+    padding: 12px 16px; outline: none;
+  }
+  .input:focus, .picker-btn:focus-visible { border-color: var(--orange); outline: none; box-shadow: 0 0 0 4px var(--orange-tint); }
+  .input[aria-invalid="true"] { border-color: var(--danger); }
+  .field-err { color: var(--danger); font-size: .9rem; margin-top: 6px; }
+  .picker-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; cursor: pointer; }
+  .picker-btn .sub { color: var(--text-faint); font-size: .9rem; margin-left: 6px; }
+  .picker-btn .chev { color: var(--text-faint); flex: none; }
+  .join-foot { margin-top: 26px; }
+  .fine { text-align: center; color: var(--text-faint); font-size: .85rem; margin-top: 16px; }
+  .fine a { color: var(--text-soft); }
+
+  /* language dialog */
+  dialog#lang-dialog {
+    border: 0; padding: 0; margin: auto; color: var(--text); background: var(--surface);
+    width: min(520px, 100vw); max-width: 100vw; height: min(680px, 100dvh); max-height: 100dvh;
+    border-radius: 22px; box-shadow: var(--shadow-card);
+  }
+  dialog#lang-dialog[open] { display: flex; flex-direction: column; }
+  dialog#lang-dialog::backdrop { background: rgba(0,0,0,.45); }
+  @media (max-width: 560px) {
+    dialog#lang-dialog { width: 100vw; height: 100dvh; border-radius: 0; }
+  }
+  .dlg-head { display: flex; align-items: center; gap: 10px; padding: calc(env(safe-area-inset-top) + 14px) 16px 10px; }
+  .dlg-head h2 { flex: 1; font-size: 1.25rem; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--surface-2);
+    display: grid; place-items: center; cursor: pointer; flex: none; font-size: 1.1rem; line-height: 1;
+  }
+  .dlg-search { padding: 0 16px 10px; }
+  .lang-list { list-style: none; margin: 0; padding: 4px 8px calc(env(safe-area-inset-bottom) + 12px); overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+  .lang-opt {
+    width: 100%; display: flex; align-items: baseline; gap: 8px; text-align: left;
+    background: none; border: 0; border-radius: 12px; padding: 13px 12px; cursor: pointer; font-size: 1.05rem;
+  }
+  .lang-opt:hover { background: var(--surface-2); }
+  .lang-opt[aria-selected="true"] { background: var(--orange-tint); font-weight: 600; }
+  .lang-opt[aria-selected="true"]::after { content: "✓"; margin-left: auto; color: var(--orange); font-weight: 700; }
+  .lang-opt .sub { color: var(--text-faint); font-size: .9rem; font-weight: 400; }
+  .lang-empty { color: var(--text-faint); padding: 24px 12px; text-align: center; }
+
+  /* chat */
+  #screen-chat { max-width: 760px; margin: 0 auto; background: var(--bg); }
+  .chat-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) 10px calc(env(safe-area-inset-left) + 16px);
+    border-bottom: 1px solid var(--line); background: var(--bg); flex: none;
+  }
+  .chat-head .avatar { width: 42px; height: 42px; font-size: 1.15rem; margin: 0; box-shadow: none; flex: none; }
+  .chat-head .who { min-width: 0; flex: 1; }
+  .chat-head .name { font-weight: 700; font-size: 1.08rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-head .by { font-size: .8rem; color: var(--text-faint); display: flex; align-items: center; gap: 6px; }
+  .chat-head .by .mark { width: 14px; height: 14px; }
+  .live-note { flex: none; text-align: center; font-size: .78rem; color: var(--text-faint); padding: 6px 16px; }
+  .conn-pill { flex: none; text-align: center; font-size: .82rem; font-weight: 600; color: var(--orange-deep); background: var(--orange-tint); padding: 6px 16px; }
+
+  .app-banner {
+    flex: none; margin: 4px 12px 0; display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 8px 10px 12px;
+    box-shadow: var(--shadow-card); font-size: .9rem;
+  }
+  .app-banner .mark { width: 32px; height: 32px; }
+  .app-banner p { flex: 1; min-width: 0; color: var(--text-soft); line-height: 1.35; }
+  .app-banner .get { flex: none; font-weight: 700; color: var(--orange); text-decoration: none; padding: 8px 6px; }
+  .app-banner .icon-btn { width: 36px; height: 36px; background: transparent; color: var(--text-faint); }
+
+  .messages {
+    flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+    padding: 14px calc(env(safe-area-inset-right) + 12px) 10px calc(env(safe-area-inset-left) + 12px);
+    display: flex; flex-direction: column;
+  }
+  .messages::before { content: ""; flex: 1; } /* keeps a short thread pinned to the bottom */
+  .empty-hint { text-align: center; color: var(--text-faint); padding: 24px 20px; font-size: .95rem; }
+  .row { display: flex; flex-direction: column; margin-top: 10px; max-width: 100%; }
+  .row.cont { margin-top: 3px; }
+  .row.me { align-items: flex-end; }
+  .row.them { align-items: flex-start; }
+  .bubble {
+    font-family: var(--chat-font); font-size: 1.02rem; line-height: 1.4;
+    max-width: min(80%, 520px); padding: 9px 14px; border-radius: 20px;
+    white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word;
+  }
+  .me .bubble { background: var(--orange); color: #fff; border-bottom-right-radius: 6px; }
+  .them .bubble { background: var(--bubble-them); border-bottom-left-radius: 6px; }
+  .me.cont-next .bubble { border-bottom-right-radius: 20px; }
+  .them.cont-next .bubble { border-bottom-left-radius: 20px; }
+  .row.pending .bubble { opacity: .7; }
+  .row.failed .bubble { background: transparent; color: var(--text); border: 1.5px solid var(--danger); cursor: pointer; }
+  .meta { font-size: .74rem; color: var(--text-faint); margin: 3px 6px 0; }
+  .row.failed .meta { color: var(--danger); font-weight: 600; cursor: pointer; background: none; border: 0; padding: 4px 6px; }
+  .sys { font-size: .86rem; color: var(--text-faint); font-style: italic; padding: 4px 6px; max-width: 80%; }
+  .shimmer {
+    color: transparent; border-radius: 6px;
+    background: linear-gradient(90deg, var(--text-faint) 0%, var(--text-soft) 40%, var(--text-faint) 80%);
+    background-size: 200% 100%; -webkit-background-clip: text; background-clip: text;
+    animation: shimmer 1.4s linear infinite;
+  }
+  @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+
+  .composer {
+    flex: none; display: flex; align-items: flex-end; gap: 8px;
+    padding: 8px calc(env(safe-area-inset-right) + 10px) calc(env(safe-area-inset-bottom) + 8px) calc(env(safe-area-inset-left) + 10px);
+    border-top: 1px solid var(--line); background: var(--bg);
+  }
+  .composer textarea {
+    flex: 1; resize: none; font-family: var(--chat-font); font-size: 17px; line-height: 1.35;
+    min-height: 46px; max-height: 160px; padding: 11px 16px; border-radius: 23px;
+    border: 1.5px solid var(--line); background: var(--surface); outline: none; overflow-y: auto;
+  }
+  .composer textarea:focus { border-color: var(--orange); }
+  .composer textarea:disabled { opacity: .6; }
+  .send-btn {
+    flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+    background: var(--grad); color: #fff; display: grid; place-items: center;
+    -webkit-tap-highlight-color: transparent; transition: opacity .15s ease, transform .1s ease;
+  }
+  .send-btn:active { transform: scale(.94); }
+  .send-btn[disabled] { opacity: .4; cursor: default; }
+  .send-btn svg { width: 22px; height: 22px; }
+
+  /* toast */
+  #toast {
+    position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 84px);
+    z-index: 100; max-width: calc(100vw - 32px); width: max-content; pointer-events: none;
+  }
+  #toast .t {
+    background: var(--text); color: var(--bg); padding: 11px 18px; border-radius: 14px; font-size: .95rem; font-weight: 500;
+    box-shadow: var(--shadow-card); animation: toastIn .2s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(8px); } }
+
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner, .shimmer, #toast .t { animation-duration: 0s !important; animation-iteration-count: 1 !important; }
+    .shimmer { color: var(--text-faint); background: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="markGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F0801E" />
+      <stop offset="1" stop-color="#F4A93C" />
+    </linearGradient>
+    <symbol id="logo" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="24" fill="url(#markGrad)" />
+      <rect x="16" y="14" width="20" height="64" rx="10" fill="#fff" />
+      <path d="M53 52 H77 A9 9 0 0 1 86 61 V69 A9 9 0 0 1 77 78 H44 V61 A9 9 0 0 1 53 52 Z" fill="#fff" />
+      <circle cx="56" cy="65" r="3.2" fill="#F2882B" />
+      <circle cx="65" cy="65" r="3.2" fill="#F2882B" />
+      <circle cx="74" cy="65" r="3.2" fill="#F2882B" />
+    </symbol>
+  </defs>
+</svg>
+
+<div id="app">
+
+  <!-- 1. Loading -->
+  <section id="screen-loading" class="screen" aria-busy="true">
+    <svg class="mark" aria-hidden="true"><use href="#logo" /></svg>
+    <div class="spinner" aria-hidden="true"></div>
+    <p data-i18n="loading" role="status">Opening your chat…</p>
+  </section>
+
+  <!-- 2. Invalid invite / connection problem -->
+  <section id="screen-state" class="screen scroll-screen state" hidden>
+    <div class="center-col">
+      <a class="brand" href="https://langiddy.com"><svg class="mark" aria-hidden="true"><use href="#logo" /></svg>Langiddy</a>
+      <div class="state-ico" id="state-ico" aria-hidden="true">🔗</div>
+      <h1 id="state-title"></h1>
+      <p id="state-body"></p>
+      <button type="button" class="btn btn-primary" id="state-retry" data-i18n="retry" hidden>Try again</button>
+      <a class="btn btn-primary" id="state-get" href="https://langiddy.com" data-i18n="getLangiddy">Get Langiddy</a>
+    </div>
+  </section>
+
+  <!-- 3. Join -->
+  <section id="screen-join" class="screen scroll-screen" hidden>
+    <form class="center-col" id="join-form" novalidate>
+      <div class="join-head">
+        <div class="avatar" id="join-avatar" aria-hidden="true"></div>
+        <h1 id="join-title"></h1>
+        <p id="join-sub"></p>
+      </div>
+
+      <div class="field">
+        <span class="label" id="lang-label" data-i18n="langLabel">Your language</span>
+        <button type="button" class="picker-btn" id="lang-btn" aria-haspopup="dialog" aria-labelledby="lang-label lang-btn-text">
+          <span id="lang-btn-text"></span>
+          <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="field">
+        <label for="name-input" data-i18n="nameLabel">Your first name</label>
+        <input class="input" id="name-input" name="name" type="text" maxlength="40" autocomplete="given-name" autocapitalize="words" enterkeyhint="go" spellcheck="false" required data-i18n-placeholder="namePlaceholder" aria-describedby="name-err" />
+        <div class="field-err" id="name-err" hidden></div>
+      </div>
+
+      <div class="join-foot">
+        <button type="submit" class="btn btn-primary" id="join-btn"><span data-i18n="start">Start chatting</span></button>
+        <p class="fine"><a href="https://langiddy.com/terms.html" target="_blank" rel="noopener">Terms</a> · <a href="https://langiddy.com/privacy.html" target="_blank" rel="noopener">Privacy</a></p>
+      </div>
+    </form>
+  </section>
+
+  <!-- 4. Chat -->
+  <section id="screen-chat" class="screen" hidden>
+    <header class="chat-head">
+      <div class="avatar" id="chat-avatar" aria-hidden="true"></div>
+      <div class="who">
+        <h1 class="name" id="chat-name"></h1>
+        <div class="by"><svg class="mark" aria-hidden="true"><use href="#logo" /></svg><span data-i18n="translatedBy">Translated by Langiddy</span></div>
+      </div>
+    </header>
+    <p class="live-note" data-i18n="liveNote">You'll see new messages while this page is open.</p>
+    <div class="conn-pill" id="conn-pill" role="status" hidden></div>
+
+    <div class="app-banner" id="app-banner" hidden>
+      <svg class="mark" aria-hidden="true"><use href="#logo" /></svg>
+      <p id="banner-text"></p>
+      <a class="get" href="https://langiddy.com" target="_blank" rel="noopener" data-i18n="bannerCta">Get the app</a>
+      <button type="button" class="icon-btn" id="banner-close" data-i18n-aria="dismiss" aria-label="Dismiss">✕</button>
+    </div>
+
+    <div class="messages" id="messages" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
+      <p class="empty-hint" id="empty-hint" hidden></p>
+    </div>
+
+    <form class="composer" id="composer" novalidate>
+      <label for="msg-input" class="sr-only" data-i18n="placeholder">Write a message…</label>
+      <textarea id="msg-input" rows="1" maxlength="2000" enterkeyhint="send" autocomplete="off" data-i18n-placeholder="placeholder"></textarea>
+      <button type="submit" class="send-btn" id="send-btn" data-i18n-aria="send" aria-label="Send" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+      </button>
+    </form>
+  </section>
+</div>
+
+<dialog id="lang-dialog" aria-labelledby="lang-dlg-title">
+  <div class="dlg-head">
+    <h2 id="lang-dlg-title" data-i18n="langLabel">Your language</h2>
+    <button type="button" class="icon-btn" id="lang-close" data-i18n-aria="close" aria-label="Close">✕</button>
+  </div>
+  <div class="dlg-search">
+    <input class="input" id="lang-search" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-placeholder="langSearch" data-i18n-aria="langSearch" />
+  </div>
+  <ul class="lang-list" id="lang-list" role="listbox" aria-labelledby="lang-dlg-title"></ul>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+// ---------------------------------------------------------------------------
+// Strings (every page string lives here)
+// ---------------------------------------------------------------------------
+const STRINGS = {
+  en: {
+    loading: "Opening your chat…",
+    connectFail: "We couldn't connect. Check your internet and try again.",
+    connectTitle: "Can't connect",
+    retry: "Try again",
+    getLangiddy: "Get Langiddy",
+    usedTitle: "This invite was already used",
+    usedBody: "Each invite link is for one person. Ask your friend to send you a new one.",
+    expiredTitle: "This invite has expired",
+    expiredBody: "Ask your friend to send you a fresh link.",
+    revokedTitle: "This invite isn't active anymore",
+    revokedBody: "The person who shared it turned it off. Ask them for a new link.",
+    notFoundTitle: "We can't find this invite",
+    notFoundBody: "Check the link, or ask your friend to send it again.",
+    joinTitle: "{name} invited you to chat on Langiddy",
+    joinSub: "Write in your language. {name} reads it in theirs.",
+    langLabel: "Your language",
+    langSearch: "Search languages",
+    langNone: "No matching languages",
+    nameLabel: "Your first name",
+    namePlaceholder: "First name",
+    nameRequired: "Please add your first name.",
+    start: "Start chatting",
+    close: "Close",
+    friend: "Your friend",
+    translatedBy: "Translated by Langiddy",
+    liveNote: "You'll see new messages while this page is open.",
+    placeholder: "Write a message…",
+    send: "Send",
+    translating: "Translating…",
+    media: "📷 Sent something you can see in the Langiddy app",
+    empty: "Say hi to {name}! They'll read it in their language.",
+    sending: "Sending…",
+    failed: "Not sent · Tap to retry",
+    bannerText: "Get the Langiddy app so you never miss a message from {name}",
+    bannerCta: "Get the app",
+    dismiss: "Dismiss",
+    tooFast: "You're sending too fast — try again in a moment",
+    tooManyTries: "Too many tries right now. Wait a minute and try again.",
+    blocked: "You can't send messages in this chat anymore.",
+    tooLong: "Messages can be up to 2,000 characters.",
+    generic: "Something went wrong. Please try again.",
+    offline: "Reconnecting…",
+    unavailable: "This chat isn't available anymore.",
+  },
+  es: {
+    loading: "Abriendo tu chat…",
+    connectFail: "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.",
+    connectTitle: "Sin conexión",
+    retry: "Reintentar",
+    getLangiddy: "Descargar Langiddy",
+    usedTitle: "Esta invitación ya se usó",
+    usedBody: "Cada enlace de invitación es para una sola persona. Pídele a tu amigo que te envíe otro.",
+    expiredTitle: "Esta invitación caducó",
+    expiredBody: "Pídele a tu amigo que te envíe un enlace nuevo.",
+    revokedTitle: "Esta invitación ya no está activa",
+    revokedBody: "Quien la compartió la desactivó. Pídele un enlace nuevo.",
+    notFoundTitle: "No encontramos esta invitación",
+    notFoundBody: "Revisa el enlace o pídele a tu amigo que te lo vuelva a enviar.",
+    joinTitle: "{name} te invitó a chatear en Langiddy",
+    joinSub: "Escribe en tu idioma. {name} lo lee en el suyo.",
+    langLabel: "Tu idioma",
+    langSearch: "Buscar idioma",
+    langNone: "No hay idiomas que coincidan",
+    nameLabel: "Tu nombre",
+    namePlaceholder: "Nombre",
+    nameRequired: "Escribe tu nombre, por favor.",
+    start: "Empezar a chatear",
+    close: "Cerrar",
+    friend: "Tu amigo",
+    translatedBy: "Traducido por Langiddy",
+    liveNote: "Verás los mensajes nuevos mientras esta página esté abierta.",
+    placeholder: "Escribe un mensaje…",
+    send: "Enviar",
+    translating: "Traduciendo…",
+    media: "📷 Envió algo que puedes ver en la app de Langiddy",
+    empty: "¡Saluda a {name}! Lo leerá en su idioma.",
+    sending: "Enviando…",
+    failed: "No enviado · Toca para reintentar",
+    bannerText: "Descarga la app de Langiddy para no perderte ningún mensaje de {name}",
+    bannerCta: "Descargar la app",
+    dismiss: "Cerrar",
+    tooFast: "Estás enviando muy rápido. Inténtalo en un momento.",
+    tooManyTries: "Demasiados intentos. Espera un minuto y vuelve a intentarlo.",
+    blocked: "Ya no puedes enviar mensajes en este chat.",
+    tooLong: "Los mensajes pueden tener hasta 2000 caracteres.",
+    generic: "Algo salió mal. Inténtalo de nuevo.",
+    offline: "Reconectando…",
+    unavailable: "Este chat ya no está disponible.",
+  },
+  fr: {
+    loading: "Ouverture de ta conversation…",
+    connectFail: "Connexion impossible. Vérifie ta connexion internet et réessaie.",
+    connectTitle: "Pas de connexion",
+    retry: "Réessayer",
+    getLangiddy: "Télécharger Langiddy",
+    usedTitle: "Cette invitation a déjà été utilisée",
+    usedBody: "Chaque lien d'invitation est pour une seule personne. Demande à ton ami de t'en envoyer un nouveau.",
+    expiredTitle: "Cette invitation a expiré",
+    expiredBody: "Demande à ton ami de t'envoyer un nouveau lien.",
+    revokedTitle: "Cette invitation n'est plus active",
+    revokedBody: "La personne qui l'a partagée l'a désactivée. Demande-lui un nouveau lien.",
+    notFoundTitle: "Invitation introuvable",
+    notFoundBody: "Vérifie le lien ou demande à ton ami de le renvoyer.",
+    joinTitle: "{name} t'invite à discuter sur Langiddy",
+    joinSub: "Écris dans ta langue. {name} te lit dans la sienne.",
+    langLabel: "Ta langue",
+    langSearch: "Rechercher une langue",
+    langNone: "Aucune langue trouvée",
+    nameLabel: "Ton prénom",
+    namePlaceholder: "Prénom",
+    nameRequired: "Indique ton prénom, s'il te plaît.",
+    start: "Commencer à discuter",
+    close: "Fermer",
+    friend: "Ton ami",
+    translatedBy: "Traduit par Langiddy",
+    liveNote: "Les nouveaux messages s'affichent tant que cette page est ouverte.",
+    placeholder: "Écris un message…",
+    send: "Envoyer",
+    translating: "Traduction…",
+    media: "📷 A envoyé quelque chose à voir dans l'app Langiddy",
+    empty: "Dis bonjour à {name} ! Ton message sera traduit dans sa langue.",
+    sending: "Envoi…",
+    failed: "Non envoyé · Touche pour réessayer",
+    bannerText: "Télécharge l'app Langiddy pour ne manquer aucun message de {name}",
+    bannerCta: "Télécharger l'app",
+    dismiss: "Fermer",
+    tooFast: "Tu envoies trop vite — réessaie dans un instant",
+    tooManyTries: "Trop de tentatives. Patiente une minute et réessaie.",
+    blocked: "Tu ne peux plus envoyer de messages dans cette conversation.",
+    tooLong: "Les messages sont limités à 2 000 caractères.",
+    generic: "Un problème est survenu. Réessaie.",
+    offline: "Reconnexion…",
+    unavailable: "Cette conversation n'est plus disponible.",
+  },
+  de: {
+    loading: "Dein Chat wird geöffnet…",
+    connectFail: "Keine Verbindung. Prüf dein Internet und versuch es noch mal.",
+    connectTitle: "Keine Verbindung",
+    retry: "Erneut versuchen",
+    getLangiddy: "Langiddy holen",
+    usedTitle: "Diese Einladung wurde schon verwendet",
+    usedBody: "Jeder Einladungslink gilt nur für eine Person. Bitte um einen neuen Link.",
+    expiredTitle: "Diese Einladung ist abgelaufen",
+    expiredBody: "Bitte darum, dir einen neuen Link zu schicken.",
+    revokedTitle: "Diese Einladung ist nicht mehr aktiv",
+    revokedBody: "Sie wurde von der Person, die sie geteilt hat, deaktiviert. Bitte um einen neuen Link.",
+    notFoundTitle: "Einladung nicht gefunden",
+    notFoundBody: "Prüf den Link oder lass ihn dir noch mal schicken.",
+    joinTitle: "{name} hat dich zum Chatten auf Langiddy eingeladen",
+    joinSub: "Schreib in deiner Sprache. {name} liest es in der eigenen.",
+    langLabel: "Deine Sprache",
+    langSearch: "Sprache suchen",
+    langNone: "Keine passende Sprache",
+    nameLabel: "Dein Vorname",
+    namePlaceholder: "Vorname",
+    nameRequired: "Bitte gib deinen Vornamen ein.",
+    start: "Chat starten",
+    close: "Schließen",
+    friend: "Dein Kontakt",
+    translatedBy: "Übersetzt von Langiddy",
+    liveNote: "Neue Nachrichten siehst du, solange diese Seite geöffnet ist.",
+    placeholder: "Nachricht schreiben…",
+    send: "Senden",
+    translating: "Wird übersetzt…",
+    media: "📷 Hat etwas gesendet, das du in der Langiddy-App sehen kannst",
+    empty: "Sag {name} Hallo! Die Nachricht kommt übersetzt an.",
+    sending: "Wird gesendet…",
+    failed: "Nicht gesendet · Tippen zum Wiederholen",
+    bannerText: "Hol dir die Langiddy-App, damit du keine Nachricht von {name} verpasst",
+    bannerCta: "App holen",
+    dismiss: "Schließen",
+    tooFast: "Du sendest zu schnell – versuch es gleich noch mal",
+    tooManyTries: "Zu viele Versuche. Warte eine Minute und versuch es erneut.",
+    blocked: "Du kannst in diesem Chat keine Nachrichten mehr senden.",
+    tooLong: "Nachrichten dürfen höchstens 2.000 Zeichen lang sein.",
+    generic: "Etwas ist schiefgelaufen. Bitte versuch es noch mal.",
+    offline: "Verbindung wird wiederhergestellt…",
+    unavailable: "Dieser Chat ist nicht mehr verfügbar.",
+  },
+  it: {
+    loading: "Sto aprendo la chat…",
+    connectFail: "Impossibile connettersi. Controlla la connessione e riprova.",
+    connectTitle: "Nessuna connessione",
+    retry: "Riprova",
+    getLangiddy: "Scarica Langiddy",
+    usedTitle: "Questo invito è già stato usato",
+    usedBody: "Ogni link d'invito vale per una sola persona. Chiedi al tuo amico di mandartene uno nuovo.",
+    expiredTitle: "Questo invito è scaduto",
+    expiredBody: "Chiedi al tuo amico di mandarti un nuovo link.",
+    revokedTitle: "Questo invito non è più attivo",
+    revokedBody: "Chi l'ha condiviso l'ha disattivato. Chiedigli un nuovo link.",
+    notFoundTitle: "Invito non trovato",
+    notFoundBody: "Controlla il link o chiedi al tuo amico di rimandartelo.",
+    joinTitle: "{name} ti ha invitato a chattare su Langiddy",
+    joinSub: "Scrivi nella tua lingua. {name} legge nella sua.",
+    langLabel: "La tua lingua",
+    langSearch: "Cerca una lingua",
+    langNone: "Nessuna lingua trovata",
+    nameLabel: "Il tuo nome",
+    namePlaceholder: "Nome",
+    nameRequired: "Inserisci il tuo nome.",
+    start: "Inizia a chattare",
+    close: "Chiudi",
+    friend: "Il tuo amico",
+    translatedBy: "Tradotto da Langiddy",
+    liveNote: "Vedrai i nuovi messaggi finché questa pagina resta aperta.",
+    placeholder: "Scrivi un messaggio…",
+    send: "Invia",
+    translating: "Traduzione…",
+    media: "📷 Ha inviato qualcosa che puoi vedere nell'app Langiddy",
+    empty: "Saluta {name}! Leggerà il messaggio nella sua lingua.",
+    sending: "Invio…",
+    failed: "Non inviato · Tocca per riprovare",
+    bannerText: "Scarica l'app Langiddy per non perdere nessun messaggio di {name}",
+    bannerCta: "Scarica l'app",
+    dismiss: "Chiudi",
+    tooFast: "Stai inviando troppo in fretta, riprova tra un attimo",
+    tooManyTries: "Troppi tentativi. Aspetta un minuto e riprova.",
+    blocked: "Non puoi più inviare messaggi in questa chat.",
+    tooLong: "I messaggi possono avere al massimo 2.000 caratteri.",
+    generic: "Qualcosa è andato storto. Riprova.",
+    offline: "Riconnessione…",
+    unavailable: "Questa chat non è più disponibile.",
+  },
+  pt: {
+    loading: "Abrindo sua conversa…",
+    connectFail: "Não conseguimos conectar. Verifique sua internet e tente de novo.",
+    connectTitle: "Sem conexão",
+    retry: "Tentar de novo",
+    getLangiddy: "Baixar o Langiddy",
+    usedTitle: "Este convite já foi usado",
+    usedBody: "Cada link de convite é para uma pessoa só. Peça um novo para quem te convidou.",
+    expiredTitle: "Este convite expirou",
+    expiredBody: "Peça para quem te convidou mandar um link novo.",
+    revokedTitle: "Este convite não está mais ativo",
+    revokedBody: "Quem compartilhou desativou o convite. Peça um link novo.",
+    notFoundTitle: "Não encontramos este convite",
+    notFoundBody: "Confira o link ou peça para enviarem de novo.",
+    joinTitle: "{name} convidou você para conversar no Langiddy",
+    joinSub: "Escreva no seu idioma. {name} lê na própria língua.",
+    langLabel: "Seu idioma",
+    langSearch: "Buscar idioma",
+    langNone: "Nenhum idioma encontrado",
+    nameLabel: "Seu primeiro nome",
+    namePlaceholder: "Primeiro nome",
+    nameRequired: "Coloque seu primeiro nome.",
+    start: "Começar a conversar",
+    close: "Fechar",
+    friend: "Seu contato",
+    translatedBy: "Traduzido pelo Langiddy",
+    liveNote: "Você vê as novas mensagens enquanto esta página estiver aberta.",
+    placeholder: "Escreva uma mensagem…",
+    send: "Enviar",
+    translating: "Traduzindo…",
+    media: "📷 Enviou algo que você pode ver no app Langiddy",
+    empty: "Diga oi para {name}! A mensagem vai chegar traduzida.",
+    sending: "Enviando…",
+    failed: "Não enviada · Toque para tentar de novo",
+    bannerText: "Baixe o app Langiddy para não perder nenhuma mensagem de {name}",
+    bannerCta: "Baixar o app",
+    dismiss: "Fechar",
+    tooFast: "Você está enviando rápido demais — tente de novo daqui a pouco",
+    tooManyTries: "Muitas tentativas. Espere um minuto e tente de novo.",
+    blocked: "Você não pode mais enviar mensagens nesta conversa.",
+    tooLong: "As mensagens podem ter até 2.000 caracteres.",
+    generic: "Algo deu errado. Tente de novo.",
+    offline: "Reconectando…",
+    unavailable: "Esta conversa não está mais disponível.",
+  },
+  ja: {
+    loading: "チャットを開いています…",
+    connectFail: "接続できませんでした。インターネット接続を確認して、もう一度お試しください。",
+    connectTitle: "接続できません",
+    retry: "もう一度試す",
+    getLangiddy: "Langiddyを入手",
+    usedTitle: "この招待はすでに使われています",
+    usedBody: "招待リンクは1人につき1つです。新しいリンクを送ってもらってください。",
+    expiredTitle: "この招待は期限切れです",
+    expiredBody: "新しいリンクを送ってもらってください。",
+    revokedTitle: "この招待は無効になりました",
+    revokedBody: "共有した人が招待を取り消しました。新しいリンクを頼んでみてください。",
+    notFoundTitle: "招待が見つかりません",
+    notFoundBody: "リンクを確認するか、もう一度送ってもらってください。",
+    joinTitle: "{name}からLangiddyのチャットに招待されました",
+    joinSub: "あなたの言語で書いてOK。{name}には相手の言語で届きます。",
+    langLabel: "あなたの言語",
+    langSearch: "言語を検索",
+    langNone: "該当する言語がありません",
+    nameLabel: "あなたの名前",
+    namePlaceholder: "名前",
+    nameRequired: "名前を入力してください。",
+    start: "チャットを始める",
+    close: "閉じる",
+    friend: "友だち",
+    translatedBy: "翻訳：Langiddy",
+    liveNote: "このページを開いている間、新しいメッセージが表示されます。",
+    placeholder: "メッセージを入力…",
+    send: "送信",
+    translating: "翻訳中…",
+    media: "📷 Langiddyアプリで見られるものが送られました",
+    empty: "{name}にあいさつしてみましょう！相手の言語に翻訳されて届きます。",
+    sending: "送信中…",
+    failed: "送信できませんでした · タップして再送",
+    bannerText: "Langiddyアプリを入れて、{name}からのメッセージを見逃さないようにしましょう",
+    bannerCta: "アプリを入手",
+    dismiss: "閉じる",
+    tooFast: "送信が速すぎます。少し待ってからもう一度お試しください",
+    tooManyTries: "試行回数が多すぎます。1分ほど待ってからもう一度お試しください。",
+    blocked: "このチャットではメッセージを送信できなくなりました。",
+    tooLong: "メッセージは2,000文字までです。",
+    generic: "問題が発生しました。もう一度お試しください。",
+    offline: "再接続中…",
+    unavailable: "このチャットは利用できなくなりました。",
+  },
+  ko: {
+    loading: "채팅을 여는 중…",
+    connectFail: "연결할 수 없어요. 인터넷 연결을 확인하고 다시 시도해 주세요.",
+    connectTitle: "연결할 수 없어요",
+    retry: "다시 시도",
+    getLangiddy: "Langiddy 받기",
+    usedTitle: "이미 사용된 초대예요",
+    usedBody: "초대 링크는 한 사람만 쓸 수 있어요. 새 링크를 보내 달라고 해 보세요.",
+    expiredTitle: "만료된 초대예요",
+    expiredBody: "새 링크를 보내 달라고 해 보세요.",
+    revokedTitle: "더 이상 유효하지 않은 초대예요",
+    revokedBody: "공유한 사람이 초대를 취소했어요. 새 링크를 요청해 보세요.",
+    notFoundTitle: "초대를 찾을 수 없어요",
+    notFoundBody: "링크를 확인하거나 다시 보내 달라고 해 보세요.",
+    joinTitle: "{name}님이 Langiddy 채팅에 초대했어요",
+    joinSub: "내 언어로 쓰면 {name}님은 자기 언어로 읽어요.",
+    langLabel: "내 언어",
+    langSearch: "언어 검색",
+    langNone: "일치하는 언어가 없어요",
+    nameLabel: "이름",
+    namePlaceholder: "이름",
+    nameRequired: "이름을 입력해 주세요.",
+    start: "채팅 시작하기",
+    close: "닫기",
+    friend: "친구",
+    translatedBy: "Langiddy 번역",
+    liveNote: "이 페이지가 열려 있는 동안 새 메시지가 표시돼요.",
+    placeholder: "메시지 입력…",
+    send: "보내기",
+    translating: "번역 중…",
+    media: "📷 Langiddy 앱에서 볼 수 있는 항목을 보냈어요",
+    empty: "{name}님에게 인사해 보세요! 상대방 언어로 번역돼서 전달돼요.",
+    sending: "보내는 중…",
+    failed: "전송 실패 · 탭하여 다시 시도",
+    bannerText: "Langiddy 앱을 받으면 {name}님의 메시지를 놓치지 않아요",
+    bannerCta: "앱 받기",
+    dismiss: "닫기",
+    tooFast: "너무 빨리 보내고 있어요. 잠시 후 다시 시도해 주세요",
+    tooManyTries: "시도 횟수가 너무 많아요. 1분 후 다시 시도해 주세요.",
+    blocked: "이 채팅에서는 더 이상 메시지를 보낼 수 없어요.",
+    tooLong: "메시지는 최대 2,000자까지 보낼 수 있어요.",
+    generic: "문제가 생겼어요. 다시 시도해 주세요.",
+    offline: "다시 연결하는 중…",
+    unavailable: "이 채팅은 더 이상 사용할 수 없어요.",
+  },
+  "zh-CN": {
+    loading: "正在打开聊天…",
+    connectFail: "无法连接。请检查网络后重试。",
+    connectTitle: "无法连接",
+    retry: "重试",
+    getLangiddy: "下载 Langiddy",
+    usedTitle: "此邀请已被使用",
+    usedBody: "每个邀请链接只能给一个人使用。请让对方再发一个新链接。",
+    expiredTitle: "此邀请已过期",
+    expiredBody: "请让对方发一个新链接给你。",
+    revokedTitle: "此邀请已失效",
+    revokedBody: "分享者已关闭此邀请。请向对方要一个新链接。",
+    notFoundTitle: "找不到此邀请",
+    notFoundBody: "请检查链接，或让对方重新发送。",
+    joinTitle: "{name} 邀请你在 Langiddy 上聊天",
+    joinSub: "用你的语言写，{name} 会用自己的语言读到。",
+    langLabel: "你的语言",
+    langSearch: "搜索语言",
+    langNone: "没有匹配的语言",
+    nameLabel: "你的名字",
+    namePlaceholder: "名字",
+    nameRequired: "请输入你的名字。",
+    start: "开始聊天",
+    close: "关闭",
+    friend: "你的朋友",
+    translatedBy: "由 Langiddy 翻译",
+    liveNote: "页面打开期间，你会看到新消息。",
+    placeholder: "输入消息…",
+    send: "发送",
+    translating: "翻译中…",
+    media: "📷 发送了一条内容，可在 Langiddy 应用中查看",
+    empty: "和 {name} 打个招呼吧！对方会看到翻译成自己语言的消息。",
+    sending: "发送中…",
+    failed: "未发送 · 点按重试",
+    bannerText: "下载 Langiddy 应用，不错过 {name} 的任何消息",
+    bannerCta: "下载应用",
+    dismiss: "关闭",
+    tooFast: "发送太快了，请稍后再试",
+    tooManyTries: "尝试次数过多。请等一分钟再试。",
+    blocked: "你已无法在此聊天中发送消息。",
+    tooLong: "消息最多 2000 个字符。",
+    generic: "出了点问题，请重试。",
+    offline: "正在重新连接…",
+    unavailable: "此聊天已不可用。",
+  },
+  "zh-TW": {
+    loading: "正在開啟聊天…",
+    connectFail: "無法連線。請檢查網路後再試一次。",
+    connectTitle: "無法連線",
+    retry: "重試",
+    getLangiddy: "下載 Langiddy",
+    usedTitle: "這個邀請已被使用",
+    usedBody: "每個邀請連結只能給一個人使用。請對方再傳一個新連結。",
+    expiredTitle: "這個邀請已過期",
+    expiredBody: "請對方傳一個新連結給你。",
+    revokedTitle: "這個邀請已失效",
+    revokedBody: "分享者已關閉這個邀請。請向對方要一個新連結。",
+    notFoundTitle: "找不到這個邀請",
+    notFoundBody: "請確認連結，或請對方重新傳送。",
+    joinTitle: "{name} 邀請你在 Langiddy 上聊天",
+    joinSub: "用你的語言寫，{name} 會用自己的語言讀到。",
+    langLabel: "你的語言",
+    langSearch: "搜尋語言",
+    langNone: "沒有符合的語言",
+    nameLabel: "你的名字",
+    namePlaceholder: "名字",
+    nameRequired: "請輸入你的名字。",
+    start: "開始聊天",
+    close: "關閉",
+    friend: "你的朋友",
+    translatedBy: "由 Langiddy 翻譯",
+    liveNote: "頁面開啟期間，你會看到新訊息。",
+    placeholder: "輸入訊息…",
+    send: "傳送",
+    translating: "翻譯中…",
+    media: "📷 傳送了一則內容，可在 Langiddy App 中查看",
+    empty: "跟 {name} 打聲招呼吧！對方會看到翻譯成自己語言的訊息。",
+    sending: "傳送中…",
+    failed: "未傳送 · 點一下重試",
+    bannerText: "下載 Langiddy App，不錯過 {name} 的任何訊息",
+    bannerCta: "下載 App",
+    dismiss: "關閉",
+    tooFast: "傳送太快了，請稍後再試",
+    tooManyTries: "嘗試次數過多。請等一分鐘再試。",
+    blocked: "你已無法在這個聊天中傳送訊息。",
+    tooLong: "訊息最多 2000 個字元。",
+    generic: "發生問題，請再試一次。",
+    offline: "正在重新連線…",
+    unavailable: "這個聊天已無法使用。",
+  },
+  ru: {
+    loading: "Открываем чат…",
+    connectFail: "Не удалось подключиться. Проверь интернет и попробуй ещё раз.",
+    connectTitle: "Нет подключения",
+    retry: "Повторить",
+    getLangiddy: "Скачать Langiddy",
+    usedTitle: "Это приглашение уже использовано",
+    usedBody: "Каждая ссылка-приглашение — только для одного человека. Попроси прислать новую.",
+    expiredTitle: "Срок приглашения истёк",
+    expiredBody: "Попроси прислать новую ссылку.",
+    revokedTitle: "Приглашение больше не действует",
+    revokedBody: "Автор приглашения его отключил. Попроси новую ссылку.",
+    notFoundTitle: "Приглашение не найдено",
+    notFoundBody: "Проверь ссылку или попроси прислать её ещё раз.",
+    joinTitle: "{name} приглашает тебя в чат Langiddy",
+    joinSub: "Пиши на своём языке — {name} прочитает на своём.",
+    langLabel: "Твой язык",
+    langSearch: "Найти язык",
+    langNone: "Ничего не найдено",
+    nameLabel: "Твоё имя",
+    namePlaceholder: "Имя",
+    nameRequired: "Пожалуйста, введи имя.",
+    start: "Начать чат",
+    close: "Закрыть",
+    friend: "Твой друг",
+    translatedBy: "Перевод: Langiddy",
+    liveNote: "Новые сообщения видны, пока эта страница открыта.",
+    placeholder: "Напиши сообщение…",
+    send: "Отправить",
+    translating: "Переводим…",
+    media: "📷 Отправлено вложение — его можно посмотреть в приложении Langiddy",
+    empty: "Напиши первое сообщение — {name} прочитает его на своём языке.",
+    sending: "Отправка…",
+    failed: "Не отправлено · Нажми, чтобы повторить",
+    bannerText: "Скачай приложение Langiddy, чтобы не пропускать сообщения от {name}",
+    bannerCta: "Скачать",
+    dismiss: "Закрыть",
+    tooFast: "Слишком быстро — попробуй ещё раз через минутку",
+    tooManyTries: "Слишком много попыток. Подожди минуту и попробуй снова.",
+    blocked: "Ты больше не можешь писать в этот чат.",
+    tooLong: "Сообщение может быть не длиннее 2000 символов.",
+    generic: "Что-то пошло не так. Попробуй ещё раз.",
+    offline: "Переподключаемся…",
+    unavailable: "Этот чат больше недоступен.",
+  },
+  tr: {
+    loading: "Sohbetin açılıyor…",
+    connectFail: "Bağlanamadık. İnternet bağlantını kontrol edip tekrar dene.",
+    connectTitle: "Bağlantı yok",
+    retry: "Tekrar dene",
+    getLangiddy: "Langiddy'yi indir",
+    usedTitle: "Bu davet zaten kullanılmış",
+    usedBody: "Her davet bağlantısı tek bir kişi içindir. Yeni bir bağlantı göndermesini iste.",
+    expiredTitle: "Bu davetin süresi dolmuş",
+    expiredBody: "Sana yeni bir bağlantı göndermesini iste.",
+    revokedTitle: "Bu davet artık geçerli değil",
+    revokedBody: "Paylaşan kişi daveti kapattı. Yeni bir bağlantı iste.",
+    notFoundTitle: "Bu daveti bulamadık",
+    notFoundBody: "Bağlantıyı kontrol et ya da tekrar göndermesini iste.",
+    joinTitle: "{name} seni Langiddy'de sohbete davet etti",
+    joinSub: "Kendi dilinde yaz. {name} kendi dilinde okur.",
+    langLabel: "Dilin",
+    langSearch: "Dil ara",
+    langNone: "Eşleşen dil yok",
+    nameLabel: "Adın",
+    namePlaceholder: "Ad",
+    nameRequired: "Lütfen adını yaz.",
+    start: "Sohbete başla",
+    close: "Kapat",
+    friend: "Arkadaşın",
+    translatedBy: "Çeviri: Langiddy",
+    liveNote: "Bu sayfa açıkken yeni mesajları görürsün.",
+    placeholder: "Mesaj yaz…",
+    send: "Gönder",
+    translating: "Çevriliyor…",
+    media: "📷 Langiddy uygulamasında görebileceğin bir şey gönderdi",
+    empty: "İlk mesajını yaz — {name} kendi dilinde okuyacak.",
+    sending: "Gönderiliyor…",
+    failed: "Gönderilemedi · Tekrar denemek için dokun",
+    bannerText: "{name} kişisinden gelen hiçbir mesajı kaçırmamak için Langiddy uygulamasını indir",
+    bannerCta: "Uygulamayı indir",
+    dismiss: "Kapat",
+    tooFast: "Çok hızlı gönderiyorsun — biraz sonra tekrar dene",
+    tooManyTries: "Çok fazla deneme. Bir dakika bekleyip tekrar dene.",
+    blocked: "Bu sohbete artık mesaj gönderemezsin.",
+    tooLong: "Mesajlar en fazla 2.000 karakter olabilir.",
+    generic: "Bir şeyler ters gitti. Lütfen tekrar dene.",
+    offline: "Yeniden bağlanılıyor…",
+    unavailable: "Bu sohbet artık kullanılamıyor.",
+  },
+  vi: {
+    loading: "Đang mở cuộc trò chuyện…",
+    connectFail: "Không thể kết nối. Hãy kiểm tra mạng và thử lại.",
+    connectTitle: "Không có kết nối",
+    retry: "Thử lại",
+    getLangiddy: "Tải Langiddy",
+    usedTitle: "Lời mời này đã được sử dụng",
+    usedBody: "Mỗi liên kết mời chỉ dành cho một người. Hãy nhờ người mời gửi liên kết mới.",
+    expiredTitle: "Lời mời này đã hết hạn",
+    expiredBody: "Hãy nhờ người mời gửi liên kết mới.",
+    revokedTitle: "Lời mời này không còn hiệu lực",
+    revokedBody: "Người chia sẻ đã tắt lời mời. Hãy xin một liên kết mới.",
+    notFoundTitle: "Không tìm thấy lời mời",
+    notFoundBody: "Hãy kiểm tra liên kết hoặc nhờ người mời gửi lại.",
+    joinTitle: "{name} mời bạn trò chuyện trên Langiddy",
+    joinSub: "Cứ viết bằng ngôn ngữ của bạn. {name} sẽ đọc bằng ngôn ngữ của họ.",
+    langLabel: "Ngôn ngữ của bạn",
+    langSearch: "Tìm ngôn ngữ",
+    langNone: "Không có ngôn ngữ phù hợp",
+    nameLabel: "Tên của bạn",
+    namePlaceholder: "Tên",
+    nameRequired: "Vui lòng nhập tên của bạn.",
+    start: "Bắt đầu trò chuyện",
+    close: "Đóng",
+    friend: "Người mời",
+    translatedBy: "Dịch bởi Langiddy",
+    liveNote: "Bạn sẽ thấy tin nhắn mới khi trang này đang mở.",
+    placeholder: "Nhập tin nhắn…",
+    send: "Gửi",
+    translating: "Đang dịch…",
+    media: "📷 Đã gửi nội dung bạn có thể xem trong ứng dụng Langiddy",
+    empty: "Chào {name} đi! Tin nhắn sẽ được dịch sang ngôn ngữ của họ.",
+    sending: "Đang gửi…",
+    failed: "Chưa gửi được · Chạm để thử lại",
+    bannerText: "Tải ứng dụng Langiddy để không bỏ lỡ tin nhắn nào từ {name}",
+    bannerCta: "Tải ứng dụng",
+    dismiss: "Đóng",
+    tooFast: "Bạn gửi nhanh quá — thử lại sau giây lát nhé",
+    tooManyTries: "Thử quá nhiều lần. Hãy đợi một phút rồi thử lại.",
+    blocked: "Bạn không thể gửi tin nhắn trong cuộc trò chuyện này nữa.",
+    tooLong: "Tin nhắn tối đa 2.000 ký tự.",
+    generic: "Đã xảy ra lỗi. Vui lòng thử lại.",
+    offline: "Đang kết nối lại…",
+    unavailable: "Cuộc trò chuyện này không còn khả dụng.",
+  },
+  id: {
+    loading: "Membuka obrolanmu…",
+    connectFail: "Gagal terhubung. Periksa koneksi internetmu lalu coba lagi.",
+    connectTitle: "Tidak ada koneksi",
+    retry: "Coba lagi",
+    getLangiddy: "Dapatkan Langiddy",
+    usedTitle: "Undangan ini sudah dipakai",
+    usedBody: "Setiap tautan undangan hanya untuk satu orang. Minta tautan baru ke temanmu.",
+    expiredTitle: "Undangan ini sudah kedaluwarsa",
+    expiredBody: "Minta temanmu mengirim tautan baru.",
+    revokedTitle: "Undangan ini sudah tidak aktif",
+    revokedBody: "Orang yang membagikannya sudah menonaktifkannya. Minta tautan baru.",
+    notFoundTitle: "Undangan tidak ditemukan",
+    notFoundBody: "Periksa tautannya, atau minta temanmu mengirim ulang.",
+    joinTitle: "{name} mengajakmu mengobrol di Langiddy",
+    joinSub: "Tulis dalam bahasamu. {name} membacanya dalam bahasanya sendiri.",
+    langLabel: "Bahasamu",
+    langSearch: "Cari bahasa",
+    langNone: "Bahasa tidak ditemukan",
+    nameLabel: "Nama depanmu",
+    namePlaceholder: "Nama depan",
+    nameRequired: "Isi nama depanmu dulu, ya.",
+    start: "Mulai mengobrol",
+    close: "Tutup",
+    friend: "Temanmu",
+    translatedBy: "Diterjemahkan oleh Langiddy",
+    liveNote: "Pesan baru akan muncul selama halaman ini terbuka.",
+    placeholder: "Tulis pesan…",
+    send: "Kirim",
+    translating: "Menerjemahkan…",
+    media: "📷 Mengirim sesuatu yang bisa kamu lihat di aplikasi Langiddy",
+    empty: "Sapa {name}! Pesanmu akan dibaca dalam bahasanya.",
+    sending: "Mengirim…",
+    failed: "Belum terkirim · Ketuk untuk coba lagi",
+    bannerText: "Unduh aplikasi Langiddy supaya tidak ketinggalan pesan dari {name}",
+    bannerCta: "Unduh aplikasi",
+    dismiss: "Tutup",
+    tooFast: "Kamu mengirim terlalu cepat — coba lagi sebentar lagi",
+    tooManyTries: "Terlalu banyak percobaan. Tunggu semenit lalu coba lagi.",
+    blocked: "Kamu tidak bisa lagi mengirim pesan di obrolan ini.",
+    tooLong: "Pesan maksimal 2.000 karakter.",
+    generic: "Ada yang salah. Coba lagi, ya.",
+    offline: "Menyambungkan ulang…",
+    unavailable: "Obrolan ini sudah tidak tersedia.",
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+const FIREBASE_VERSION = "10.12.2";
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyB_OkyDn-IxU11UZ4VfpboUA0fFwXgtRQw",
+  authDomain: "langiddy.firebaseapp.com",
+  databaseURL: "https://langiddy-default-rtdb.firebaseio.com",
+  projectId: "langiddy",
+  storageBucket: "langiddy.appspot.com",
+  messagingSenderId: "654123213636",
+  appId: "1:654123213636:web:4f4ee3604c81562db06d11",
+};
+const APP_URL = "https://langiddy.com";
+const MAX_TEXT = 2000;
+const MAX_NAME = 40;
+const LANG_ALIASES = { he: "iw", jv: "jw", nb: "no", nn: "no", fil: "tl", zh: "zh-CN" };
+const TRANSLATING_STATES = new Set(["pending", "processing", "partial"]);
+
+// ---------------------------------------------------------------------------
+// Small helpers
+// ---------------------------------------------------------------------------
+const $ = (id) => document.getElementById(id);
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch { /* private mode */ } },
+};
+
+const S = {
+  locale: "en",
+  token: null,
+  fb: null,            // { auth, db, fns, mods }
+  languages: [],
+  joinLang: null,
+  invite: null,        // last peek result
+  chat: null,          // { chatId, inviterName, language }
+};
+
+function pickUiLocale(code) {
+  if (!code) return null;
+  const c = String(code).trim();
+  const lower = c.toLowerCase();
+  if (lower === "zh-tw" || lower === "zh-hk" || lower === "zh-mo" || lower.startsWith("zh-hant")) return "zh-TW";
+  if (lower.startsWith("zh")) return "zh-CN";
+  const base = lower.split(/[-_]/)[0];
+  return STRINGS[base] ? base : null;
+}
+function navigatorUiLocale() {
+  const list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+  for (const l of list) { const m = pickUiLocale(l); if (m) return m; }
+  return "en";
+}
+function t(key, vars) {
+  let s = (STRINGS[S.locale] && STRINGS[S.locale][key]) ?? STRINGS.en[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split("{" + k + "}").join(v);
+  return s;
+}
+function setLocale(loc) {
+  S.locale = STRINGS[loc] ? loc : "en";
+  document.documentElement.lang = S.locale;
+  document.querySelectorAll("[data-i18n]").forEach((el) => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  refreshNamedStrings();
+}
+function inviterLabel() {
+  const n = (S.chat && S.chat.inviterName) || (S.invite && S.invite.inviterName);
+  return (n && String(n).trim()) || t("friend");
+}
+function initial(name) {
+  const ch = Array.from(String(name || "").trim())[0];
+  return ch ? ch.toLocaleUpperCase() : "★";
+}
+
+let toastTimer = 0;
+function toast(msg) {
+  const host = $("toast");
+  host.textContent = "";
+  const el = document.createElement("div");
+  el.className = "t";
+  el.textContent = msg;
+  host.appendChild(el);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { host.textContent = ""; }, 3800);
+}
+
+function errCode(e) {
+  return String((e && e.code) || "").replace(/^functions\//, "");
+}
+
+function show(id) {
+  for (const s of ["screen-loading", "screen-state", "screen-join", "screen-chat"]) $(s).hidden = s !== id;
+}
+
+// Keep #app sized to the visual viewport (iOS keyboard).
+function fitViewport() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+  const root = document.documentElement.style;
+  root.setProperty("--app-h", vv.height + "px");
+  root.setProperty("--app-top", vv.offsetTop + "px");
+}
+if (window.visualViewport) {
+  visualViewport.addEventListener("resize", () => { fitViewport(); keepPinned(); });
+  visualViewport.addEventListener("scroll", fitViewport);
+  fitViewport();
+}
+
+// ---------------------------------------------------------------------------
+// Token
+// ---------------------------------------------------------------------------
+function readToken() {
+  const q = new URLSearchParams(location.search).get("t");
+  if (q && q.trim()) return q.trim();
+  const m = location.pathname.match(/^\/c\/([^/?#]+)/);
+  if (!m) return null;
+  let seg;
+  try { seg = decodeURIComponent(m[1]); } catch { seg = m[1]; }
+  if (!seg || seg === "index.html") return null;
+  return seg.trim() || null;
+}
+
+// ---------------------------------------------------------------------------
+// Languages
+// ---------------------------------------------------------------------------
+let languagesPromise = null;
+function loadLanguages() {
+  if (!languagesPromise) {
+    languagesPromise = fetch("/c/languages.json", { cache: "force-cache" })
+      .then((r) => { if (!r.ok) throw new Error("languages " + r.status); return r.json(); })
+      .then((list) => { S.languages = Array.isArray(list) ? list : []; return S.languages; })
+      .catch((e) => { languagesPromise = null; throw e; });
+  }
+  return languagesPromise;
+}
+function findLang(code) {
+  if (!code) return null;
+  const want = String(code).trim();
+  const lower = want.toLowerCase();
+  const exact = S.languages.find((l) => l.code.toLowerCase() === lower);
+  if (exact) return exact;
+  if (lower.startsWith("zh")) {
+    const tw = /^zh[-_](tw|hk|mo|hant)/.test(lower);
+    return S.languages.find((l) => l.code === (tw ? "zh-TW" : "zh-CN")) || null;
+  }
+  const base = lower.split(/[-_]/)[0];
+  const aliased = LANG_ALIASES[base] || base;
+  return S.languages.find((l) => l.code.toLowerCase() === aliased.toLowerCase()) || null;
+}
+function guessLanguage() {
+  const list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+  for (const l of list) { const m = findLang(l); if (m) return m.code; }
+  return "en";
+}
+function langDisplay(code) {
+  const l = findLang(code);
+  if (!l) return { main: code || "", sub: "" };
+  return { main: l.native, sub: l.native.toLowerCase() !== l.en.toLowerCase() ? l.en : "" };
+}
+function fold(s) {
+  return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+}
+
+function renderLangButton() {
+  const host = $("lang-btn-text");
+  host.textContent = "";
+  const d = langDisplay(S.joinLang);
+  host.append(d.main);
+  if (d.sub) {
+    const sub = document.createElement("span");
+    sub.className = "sub";
+    sub.textContent = d.sub;
+    host.append(sub);
+  }
+}
+function renderLangList() {
+  const ul = $("lang-list");
+  const q = fold($("lang-search").value.trim());
+  ul.textContent = "";
+  let n = 0;
+  for (const l of S.languages) {
+    if (q && !(fold(l.native).includes(q) || fold(l.en).includes(q) || l.code.toLowerCase() === q)) continue;
+    n++;
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "lang-opt";
+    b.setAttribute("role", "option");
+    b.setAttribute("aria-selected", String(l.code === S.joinLang));
+    b.dataset.code = l.code;
+    b.append(l.native);
+    if (l.native.toLowerCase() !== l.en.toLowerCase()) {
+      const sub = document.createElement("span");
+      sub.className = "sub";
+      sub.textContent = l.en;
+      b.append(sub);
+    }
+    li.appendChild(b);
+    ul.appendChild(li);
+  }
+  if (!n) {
+    const li = document.createElement("li");
+    li.className = "lang-empty";
+    li.textContent = t("langNone");
+    ul.appendChild(li);
+  }
+}
+function openLangDialog() {
+  const dlg = $("lang-dialog");
+  $("lang-search").value = "";
+  renderLangList();
+  if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+  const sel = $("lang-list").querySelector('[aria-selected="true"]');
+  if (sel) sel.scrollIntoView({ block: "center" });
+  // Only auto-focus search where it won't throw a keyboard over the list.
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) $("lang-search").focus();
+  else if (sel) sel.focus({ preventScroll: true });
+}
+function closeLangDialog() {
+  const dlg = $("lang-dialog");
+  if (typeof dlg.close === "function") dlg.close(); else dlg.removeAttribute("open");
+  $("lang-btn").focus();
+}
+$("lang-btn").addEventListener("click", openLangDialog);
+$("lang-close").addEventListener("click", closeLangDialog);
+$("lang-search").addEventListener("input", renderLangList);
+$("lang-search").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const first = $("lang-list").querySelector(".lang-opt");
+    if (first) first.click();
+  }
+});
+$("lang-list").addEventListener("click", (e) => {
+  const b = e.target.closest(".lang-opt");
+  if (!b) return;
+  S.joinLang = b.dataset.code;
+  store.set("lg_guest_lang", S.joinLang);
+  renderLangButton();
+  const loc = pickUiLocale(S.joinLang);
+  setLocale(loc || navigatorUiLocale());
+  closeLangDialog();
+});
+$("lang-dialog").addEventListener("click", (e) => {
+  if (e.target === $("lang-dialog")) closeLangDialog(); // backdrop tap
+});
+
+// Strings that embed the inviter's name are rebuilt on locale change.
+function refreshNamedStrings() {
+  const name = inviterLabel();
+  $("join-title").textContent = t("joinTitle", { name });
+  $("join-sub").textContent = t("joinSub", { name });
+  $("banner-text").textContent = t("bannerText", { name });
+  $("empty-hint").textContent = t("empty", { name });
+  if (S.stateKind) renderState(S.stateKind);
+  if (S.chat) renderMessages();
+}
+
+// ---------------------------------------------------------------------------
+// State screens
+// ---------------------------------------------------------------------------
+const STATE_COPY = {
+  used: ["usedTitle", "usedBody", "🔒"],
+  expired: ["expiredTitle", "expiredBody", "⏳"],
+  revoked: ["revokedTitle", "revokedBody", "🚫"],
+  "not-found": ["notFoundTitle", "notFoundBody", "🔗"],
+  connect: ["connectTitle", "connectFail", "📡"],
+};
+function renderState(kind) {
+  const [title, body, ico] = STATE_COPY[kind] || STATE_COPY["not-found"];
+  $("state-title").textContent = t(title);
+  $("state-body").textContent = t(body);
+  $("state-ico").textContent = ico;
+  const retryable = kind === "connect";
+  $("state-retry").hidden = !retryable;
+  $("state-get").hidden = retryable;
+}
+function showState(kind) {
+  S.stateKind = kind;
+  renderState(kind);
+  document.title = "Langiddy";
+  show("screen-state");
+}
+$("state-retry").addEventListener("click", () => { S.stateKind = null; start(); });
+
+// ---------------------------------------------------------------------------
+// Firebase
+// ---------------------------------------------------------------------------
+async function initFirebase() {
+  if (S.fb) return S.fb;
+  const base = `https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/`;
+  const [appM, authM, dbM, fnM] = await Promise.all([
+    import(base + "firebase-app.js"),
+    import(base + "firebase-auth.js"),
+    import(base + "firebase-database.js"),
+    import(base + "firebase-functions.js"),
+  ]);
+  const app = appM.getApps().length ? appM.getApp() : appM.initializeApp(FIREBASE_CONFIG);
+  const auth = authM.getAuth(app); // default persistence: browserLocal → the same guest on reopen
+  const db = dbM.getDatabase(app);
+  const fns = fnM.getFunctions(app, "us-central1");
+  const call = (name) => fnM.httpsCallable(fns, name);
+  S.fb = { app, auth, db, authM, dbM, call };
+  return S.fb;
+}
+
+function currentUser() {
+  const { auth, authM } = S.fb;
+  if (auth.currentUser) return Promise.resolve(auth.currentUser);
+  return new Promise((resolve) => {
+    let done = false;
+    const unsub = authM.onAuthStateChanged(auth, (u) => {
+      if (done) return;
+      done = true;
+      Promise.resolve().then(() => unsub && unsub());
+      resolve(u);
+    });
+  });
+}
+
+async function ensureSignedIn() {
+  const { auth, authM } = S.fb;
+  const u = await currentUser();
+  if (u) return u;
+  const cred = await authM.signInAnonymously(auth);
+  return cred.user;
+}
+
+// ---------------------------------------------------------------------------
+// Boot / state machine:  loading → (state | join | chat)
+// ---------------------------------------------------------------------------
+let starting = false;
+async function start() {
+  if (starting) return;
+  starting = true;
+  show("screen-loading");
+  try {
+    S.token = readToken();
+    if (!S.token) { showState("not-found"); return; }
+    loadLanguages().catch(() => {}); // warm in parallel
+    try {
+      await initFirebase();
+      await ensureSignedIn();
+    } catch (e) {
+      console.warn("[guest] sign-in failed", errCode(e) || (e && e.name));
+      showState("connect");
+      return;
+    }
+    let res;
+    try {
+      res = (await S.fb.call("peekGuestInvite")({ token: S.token })).data || {};
+    } catch (e) {
+      const code = errCode(e);
+      if (code === "not-found" || code === "invalid-argument") { showState("not-found"); return; }
+      console.warn("[guest] peek failed", code);
+      showState("connect");
+      return;
+    }
+    S.invite = res;
+    await routeInvite(res);
+  } finally {
+    starting = false;
+  }
+}
+
+async function routeInvite(res) {
+  const status = res.status;
+  if (status === "yours" && res.chatId) {
+    const language = res.guestLanguage || store.get("lg_guest_lang") || null;
+    await enterChat({ chatId: res.chatId, inviterName: res.inviterName, language });
+    return;
+  }
+  if (status === "open") { await showJoin(res); return; }
+  if (status === "used" || status === "expired" || status === "revoked") { showState(status); return; }
+  showState("not-found");
+}
+
+async function showJoin(res) {
+  try { await loadLanguages(); } catch { showState("connect"); return; }
+  const saved = store.get("lg_guest_lang");
+  S.joinLang = (saved && findLang(saved) && findLang(saved).code) || guessLanguage();
+  setLocale(pickUiLocale(S.joinLang) || navigatorUiLocale());
+  const name = inviterLabel();
+  $("join-avatar").textContent = initial(name);
+  renderLangButton();
+  const input = $("name-input");
+  if (!input.value && res.guestName) input.value = String(res.guestName).slice(0, MAX_NAME);
+  document.title = name + " — Langiddy";
+  show("screen-join");
+}
+
+$("name-input").addEventListener("input", () => {
+  $("name-input").removeAttribute("aria-invalid");
+  $("name-err").hidden = true;
+});
+
+let redeeming = false;
+$("join-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (redeeming) return;
+  const input = $("name-input");
+  const name = input.value.trim().slice(0, MAX_NAME);
+  if (!name) {
+    input.setAttribute("aria-invalid", "true");
+    $("name-err").textContent = t("nameRequired");
+    $("name-err").hidden = false;
+    input.focus();
+    return;
+  }
+  const language = S.joinLang || "en";
+  const btn = $("join-btn");
+  redeeming = true;
+  btn.disabled = true;
+  const label = btn.firstElementChild;
+  const spin = document.createElement("span");
+  spin.className = "spinner";
+  spin.setAttribute("aria-hidden", "true");
+  label.hidden = true;
+  btn.prepend(spin);
+  btn.setAttribute("aria-busy", "true");
+  try {
+    const res = (await S.fb.call("redeemGuestInvite")({ token: S.token, name, language })).data || {};
+    store.set("lg_guest_lang", language);
+    await enterChat({ chatId: res.chatId, inviterName: res.inviterName || (S.invite && S.invite.inviterName), language });
+  } catch (err) {
+    const code = errCode(err);
+    if (code === "failed-precondition") {
+      // Used / expired / revoked — re-peek to show exactly which (or "yours" after a lost response).
+      try {
+        const res = (await S.fb.call("peekGuestInvite")({ token: S.token })).data || {};
+        S.invite = res;
+        await routeInvite(res);
+      } catch { showState("used"); }
+    } else if (code === "not-found") {
+      showState("not-found");
+    } else if (code === "resource-exhausted") {
+      toast(t("tooManyTries"));
+    } else if (code === "invalid-argument") {
+      toast(t("generic"));
+    } else {
+      toast(code === "unavailable" || code === "deadline-exceeded" || !navigator.onLine ? t("connectFail") : t("generic"));
+    }
+  } finally {
+    redeeming = false;
+    btn.disabled = false;
+    btn.removeAttribute("aria-busy");
+    spin.remove();
+    label.hidden = false;
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Chat
+// ---------------------------------------------------------------------------
+const chatState = {
+  server: [],             // [{ id, ...message }] in order
+  serverIds: new Set(),
+  seenIds: new Set(),     // for unread counting
+  firstSnap: true,
+  pending: [],            // optimistic sends
+  els: new Map(),         // key → row element
+  unread: 0,
+  unsub: null,
+  connUnsub: null,
+  canSend: true,
+};
+let localSeq = 0;
+
+async function enterChat({ chatId, inviterName, language }) {
+  if (!chatId) { showState("not-found"); return; }
+  if (!S.languages.length) { try { await loadLanguages(); } catch { /* language list is cosmetic here */ } }
+  const lang = (language && (findLang(language) || {}).code) || language || guessLanguage();
+  S.chat = { chatId, inviterName: inviterName || null, language: lang };
+  S.stateKind = null;
+  setLocale(pickUiLocale(lang) || navigatorUiLocale());
+
+  const name = inviterLabel();
+  $("chat-name").textContent = name;
+  $("chat-avatar").textContent = initial(name);
+  $("app-banner").hidden = store.get("lg_guest_banner_off:" + chatId) === "1";
+  updateTitle();
+  show("screen-chat");
+  subscribe();
+  updateSendEnabled();
+  if (matchMedia("(hover: hover) and (pointer: fine)").matches) $("msg-input").focus();
+}
+
+function subscribe() {
+  const { db, dbM, auth } = S.fb;
+  const { chatId } = S.chat;
+  if (chatState.unsub) chatState.unsub();
+  const q = dbM.query(dbM.ref(db, "messages/" + chatId), dbM.orderByChild("sentAt"), dbM.limitToLast(100));
+  chatState.unsub = dbM.onValue(q, (snap) => {
+    const list = [];
+    snap.forEach((child) => { const v = child.val(); if (v && typeof v === "object") list.push({ id: child.key, ...v }); });
+    const uid = auth.currentUser && auth.currentUser.uid;
+    if (!chatState.firstSnap) {
+      for (const m of list) {
+        if (!chatState.seenIds.has(m.id) && m.sentBy !== uid && !m.deletedAt && pageInBackground()) chatState.unread++;
+      }
+    }
+    for (const m of list) chatState.seenIds.add(m.id);
+    chatState.server = list;
+    chatState.serverIds = new Set(list.map((m) => m.id));
+    const forceBottom = chatState.firstSnap;
+    chatState.firstSnap = false;
+    renderMessages(forceBottom);
+    updateTitle();
+  }, (err) => {
+    console.warn("[guest] message listener stopped", errCode(err) || (err && err.message));
+    chatState.canSend = false;
+    updateSendEnabled();
+    const pill = $("conn-pill");
+    pill.textContent = t("unavailable");
+    pill.hidden = false;
+  });
+
+  // Connection pill: only after we were connected once, and only if the drop lasts.
+  if (chatState.connUnsub) chatState.connUnsub();
+  let wasConnected = false;
+  let offTimer = 0;
+  chatState.connUnsub = dbM.onValue(dbM.ref(db, ".info/connected"), (snap) => {
+    const on = snap.val() === true;
+    clearTimeout(offTimer);
+    const pill = $("conn-pill");
+    if (on) {
+      wasConnected = true;
+      if (chatState.canSend) pill.hidden = true;
+    } else if (wasConnected && chatState.canSend) {
+      offTimer = setTimeout(() => { pill.textContent = t("offline"); pill.hidden = false; }, 2000);
+    }
+  });
+}
+
+function pageInBackground() {
+  return document.hidden || !document.hasFocus();
+}
+function updateTitle() {
+  if (!S.chat) return;
+  const base = inviterLabel() + " — Langiddy";
+  document.title = chatState.unread > 0 ? `(${chatState.unread}) ${base}` : base;
+}
+function clearUnread() {
+  if (!chatState.unread) return;
+  chatState.unread = 0;
+  updateTitle();
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) clearUnread(); });
+window.addEventListener("focus", clearUnread);
+
+// Match optimistic bubbles to the real messages they became.
+function reconcilePending() {
+  const uid = S.fb.auth.currentUser && S.fb.auth.currentUser.uid;
+  const claimed = new Set();
+  chatState.pending = chatState.pending.filter((p) => {
+    if (p.messageId) {
+      if (chatState.serverIds.has(p.messageId)) return false;
+      claimed.add(p.messageId);
+      return true;
+    }
+    // Failed ones match too: a timed-out call may still have created the message.
+    const hit = chatState.server.find((m) =>
+      m.sentBy === uid && !claimed.has(m.id) && !p.knownIds.has(m.id) && m.text === p.text);
+    if (hit) { claimed.add(hit.id); return false; }
+    return true;
+  });
+}
+
+function messageView(m, uid, lang) {
+  // returns { side, kind: "text"|"sys"|"translating", text }
+  const side = m.sentBy === uid ? "me" : "them";
+  const kind = m.kind;
+  if (kind && kind !== "text") return { side, kind: "sys", text: t("media") };
+  if (side === "me") return { side, kind: "text", text: String(m.text ?? "") };
+  const tr = m.translationsByLang && m.translationsByLang[lang];
+  if (typeof tr === "string" && tr.trim()) return { side, kind: "text", text: tr };
+  if (TRANSLATING_STATES.has(m.translationState)) return { side, kind: "translating", text: t("translating") };
+  return { side, kind: "text", text: String(m.text ?? "") };
+}
+
+function isNearBottom(el) {
+  return el.scrollHeight - el.scrollTop - el.clientHeight < 96;
+}
+function keepPinned() {
+  const box = $("messages");
+  if (box && !$("screen-chat").hidden && chatState.pinned !== false) box.scrollTop = box.scrollHeight;
+}
+$("messages").addEventListener("scroll", () => { chatState.pinned = isNearBottom($("messages")); }, { passive: true });
+
+function renderMessages(forceBottom = false) {
+  if (!S.chat || !S.fb) return;
+  const box = $("messages");
+  const stick = forceBottom || isNearBottom(box);
+  const uid = S.fb.auth.currentUser && S.fb.auth.currentUser.uid;
+  const lang = S.chat.language;
+  reconcilePending();
+
+  const entries = [];
+  for (const m of chatState.server) {
+    if (m.deletedAt) continue;
+    const v = messageView(m, uid, lang);
+    if (!v.text && v.kind === "text") continue;
+    entries.push({ key: "s:" + m.id, ...v, status: "sent", at: m.sentAt });
+  }
+  for (const p of chatState.pending) {
+    entries.push({ key: "p:" + p.localId, side: "me", kind: "text", text: p.text, status: p.status, localId: p.localId });
+  }
+
+  $("empty-hint").hidden = entries.length > 0;
+  const live = new Set();
+  let anchor = $("empty-hint");
+  entries.forEach((e, i) => {
+    const prev = entries[i - 1], next = entries[i + 1];
+    e.cont = !!(prev && prev.side === e.side);
+    e.contNext = !!(next && next.side === e.side);
+    let row = chatState.els.get(e.key);
+    const sig = [e.side, e.kind, e.text, e.status, e.cont, e.contNext, S.locale].join("\u0001");
+    if (!row) { row = document.createElement("div"); chatState.els.set(e.key, row); }
+    if (row._sig !== sig) { paintRow(row, e); row._sig = sig; }
+    live.add(e.key);
+    if (anchor.nextSibling !== row) box.insertBefore(row, anchor.nextSibling);
+    anchor = row;
+  });
+  for (const [key, row] of chatState.els) {
+    if (!live.has(key)) { row.remove(); chatState.els.delete(key); }
+  }
+  if (stick) { box.scrollTop = box.scrollHeight; chatState.pinned = true; }
+}
+
+function paintRow(row, e) {
+  row.className = ["row", e.side, e.cont ? "cont" : "", e.contNext ? "cont-next" : "",
+    e.status === "sending" ? "pending" : "", e.status === "failed" ? "failed" : ""].filter(Boolean).join(" ");
+  row.textContent = "";
+  if (e.kind === "sys") {
+    const p = document.createElement("div");
+    p.className = "sys";
+    p.textContent = e.text;
+    row.appendChild(p);
+    return;
+  }
+  const b = document.createElement("div");
+  b.className = "bubble";
+  b.dir = "auto";
+  if (e.kind === "translating") {
+    const s = document.createElement("span");
+    s.className = "shimmer";
+    s.textContent = e.text;
+    b.appendChild(s);
+  } else {
+    b.textContent = e.text;
+  }
+  if (e.at) { const d = new Date(e.at); if (!isNaN(d)) b.title = d.toLocaleString(S.locale); }
+  row.appendChild(b);
+  if (e.status === "sending") {
+    const m = document.createElement("div");
+    m.className = "meta";
+    m.textContent = t("sending");
+    row.appendChild(m);
+  } else if (e.status === "failed") {
+    b.setAttribute("role", "button");
+    b.tabIndex = 0;
+    b.setAttribute("aria-label", t("failed"));
+    b.dataset.retry = e.localId;
+    const m = document.createElement("button");
+    m.type = "button";
+    m.className = "meta";
+    m.textContent = t("failed");
+    m.dataset.retry = e.localId;
+    row.appendChild(m);
+  }
+}
+
+$("messages").addEventListener("click", (e) => {
+  const el = e.target.closest("[data-retry]");
+  if (el) retrySend(Number(el.dataset.retry));
+});
+$("messages").addEventListener("keydown", (e) => {
+  if ((e.key === "Enter" || e.key === " ") && e.target.matches(".bubble[data-retry]")) {
+    e.preventDefault();
+    retrySend(Number(e.target.dataset.retry));
+  }
+});
+
+// Composer
+const input = $("msg-input");
+const sendBtn = $("send-btn");
+const finePointer = matchMedia("(hover: hover) and (pointer: fine)");
+
+function autoGrow() {
+  input.style.height = "auto";
+  input.style.height = Math.min(input.scrollHeight + 3, 160) + "px";
+}
+function updateSendEnabled() {
+  sendBtn.disabled = !chatState.canSend || !input.value.trim();
+  input.disabled = !chatState.canSend;
+}
+input.addEventListener("input", () => { autoGrow(); updateSendEnabled(); });
+input.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || e.shiftKey || e.isComposing || e.keyCode === 229) return;
+  if (!finePointer.matches) return; // phones: Enter = newline
+  e.preventDefault();
+  submitMessage();
+});
+// Keep the keyboard up when tapping Send.
+sendBtn.addEventListener("pointerdown", (e) => { if (document.activeElement === input) e.preventDefault(); });
+$("composer").addEventListener("submit", (e) => { e.preventDefault(); submitMessage(); });
+
+function submitMessage() {
+  if (!chatState.canSend) return;
+  const text = input.value.trim();
+  if (!text) return;
+  if (text.length > MAX_TEXT) { toast(t("tooLong")); return; }
+  const p = { localId: ++localSeq, text, status: "sending", messageId: null, knownIds: new Set(chatState.serverIds) };
+  chatState.pending.push(p);
+  input.value = "";
+  autoGrow();
+  updateSendEnabled();
+  renderMessages(true);
+  doSend(p);
+}
+
+function retrySend(localId) {
+  const p = chatState.pending.find((x) => x.localId === localId);
+  if (!p || p.status !== "failed" || !chatState.canSend) return;
+  p.status = "sending";
+  p.knownIds = new Set(chatState.serverIds);
+  renderMessages(true);
+  doSend(p);
+}
+
+async function doSend(p) {
+  try {
+    const res = (await S.fb.call("sendGuestMessage")({ chatId: S.chat.chatId, text: p.text })).data || {};
+    p.status = "sent";
+    if (res.messageId) p.messageId = String(res.messageId);
+  } catch (err) {
+    const code = errCode(err);
+    p.status = "failed";
+    if (code === "resource-exhausted") toast(t("tooFast"));
+    else if (code === "permission-denied") {
+      toast(t("blocked"));
+      chatState.canSend = false;
+      updateSendEnabled();
+    } else if (code === "invalid-argument") toast(p.text.length > MAX_TEXT ? t("tooLong") : t("generic"));
+    else if (code === "unavailable" || code === "deadline-exceeded" || !navigator.onLine) toast(t("connectFail"));
+    else toast(t("generic"));
+  }
+  renderMessages();
+}
+
+// Banner
+$("banner-close").addEventListener("click", () => {
+  $("app-banner").hidden = true;
+  if (S.chat) store.set("lg_guest_banner_off:" + S.chat.chatId, "1");
+  input.focus({ preventScroll: true });
+});
+
+// ---------------------------------------------------------------------------
+setLocale(navigatorUiLocale());
+start();
+</script>
+</body>
+</html>
