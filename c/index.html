@@ -201,6 +201,14 @@
   .chat-head .name { font-weight: 700; font-size: 1.08rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .chat-head .by { font-size: .8rem; color: var(--text-faint); display: flex; align-items: center; gap: 6px; }
   .chat-head .by .mark { width: 14px; height: 14px; }
+  .learn-pill { flex: none; border: 1.5px solid var(--line); background: transparent; color: var(--text-soft); border-radius: 999px; padding: 7px 12px; font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .learn-pill[aria-pressed="true"] { border-color: var(--orange); background: var(--orange); color: #fff; }
+  .learn-opt { display: flex; gap: 12px; align-items: flex-start; padding: 14px; margin-bottom: 18px; border: 1.5px solid var(--line); border-radius: 16px; cursor: pointer; }
+  .learn-opt:has(input:checked) { border-color: var(--orange); }
+  .learn-opt input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--orange); flex: none; }
+  .learn-copy { display: flex; flex-direction: column; gap: 2px; }
+  .learn-title { font-weight: 700; }
+  .learn-sub { font-size: .88rem; color: var(--text-soft); }
   .live-note { flex: none; text-align: center; font-size: .78rem; color: var(--text-faint); padding: 6px 16px; }
   .conn-pill { flex: none; text-align: center; font-size: .82rem; font-weight: 600; color: var(--orange-deep); background: var(--orange-tint); padding: 6px 16px; }
 
@@ -347,6 +355,11 @@
         </button>
       </div>
 
+      <label class="learn-opt" id="learn-opt" hidden>
+        <input type="checkbox" id="learn-input" />
+        <span class="learn-copy"><span class="learn-title" id="learn-title"></span><span class="learn-sub" id="learn-sub"></span></span>
+      </label>
+
       <div class="field">
         <label for="name-input" data-i18n="nameLabel">Your first name</label>
         <input class="input" id="name-input" name="name" type="text" maxlength="40" autocomplete="given-name" autocapitalize="words" enterkeyhint="go" spellcheck="false" required data-i18n-placeholder="namePlaceholder" aria-describedby="name-err" />
@@ -368,6 +381,7 @@
         <h1 class="name" id="chat-name"></h1>
         <div class="by"><svg class="mark" aria-hidden="true"><use href="#logo" /></svg><span data-i18n="translatedBy">Translated by Langiddy</span></div>
       </div>
+      <button type="button" class="learn-pill" id="learn-pill" aria-pressed="false" hidden></button>
     </header>
     <p class="live-note" data-i18n="liveNote">You'll see new messages while this page is open.</p>
     <div class="conn-pill" id="conn-pill" role="status" hidden></div>
@@ -448,6 +462,10 @@ const STRINGS = {
     bannerText: "Learn {name}'s language as you chat.",
     showOriginal: "Show original",
     hideOriginal: "Hide original",
+    learnTitle: "Also learn {language}",
+    learnSub: "See {name}'s messages in {language}, with your language underneath.",
+    learnOn: "Learning {language}",
+    learnOff: "Learn {language}",
     bannerCta: "Get the app",
     dismiss: "Dismiss",
     tooFast: "You're sending too fast — try again in a moment",
@@ -495,6 +513,10 @@ const STRINGS = {
     bannerText: "Aprende el idioma de {name} mientras chateas.",
     showOriginal: "Mostrar original",
     hideOriginal: "Ocultar original",
+    learnTitle: "Aprender también {language}",
+    learnSub: "Ve los mensajes de {name} en {language}, con tu idioma debajo.",
+    learnOn: "Aprendiendo {language}",
+    learnOff: "Aprender {language}",
     bannerCta: "Descargar la app",
     dismiss: "Cerrar",
     tooFast: "Estás enviando muy rápido. Inténtalo en un momento.",
@@ -542,6 +564,10 @@ const STRINGS = {
     bannerText: "Apprends la langue de {name} en discutant.",
     showOriginal: "Voir l'original",
     hideOriginal: "Masquer l'original",
+    learnTitle: "Apprendre aussi : {language}",
+    learnSub: "Vois les messages de {name} en {language}, avec ta langue en dessous.",
+    learnOn: "J'apprends : {language}",
+    learnOff: "Apprendre : {language}",
     bannerCta: "Télécharger l'app",
     dismiss: "Fermer",
     tooFast: "Tu envoies trop vite — réessaie dans un instant",
@@ -589,6 +615,10 @@ const STRINGS = {
     bannerText: "Lerne beim Chatten die Sprache von {name}.",
     showOriginal: "Original anzeigen",
     hideOriginal: "Original ausblenden",
+    learnTitle: "Auch {language} lernen",
+    learnSub: "Sieh die Nachrichten von {name} auf {language}, mit deiner Sprache darunter.",
+    learnOn: "Ich lerne {language}",
+    learnOff: "{language} lernen",
     bannerCta: "App holen",
     dismiss: "Schließen",
     tooFast: "Du sendest zu schnell – versuch es gleich noch mal",
@@ -636,6 +666,10 @@ const STRINGS = {
     bannerText: "Impara la lingua di {name} mentre chatti.",
     showOriginal: "Mostra originale",
     hideOriginal: "Nascondi originale",
+    learnTitle: "Impara anche {language}",
+    learnSub: "Vedi i messaggi di {name} in {language}, con la tua lingua sotto.",
+    learnOn: "Sto imparando: {language}",
+    learnOff: "Impara: {language}",
     bannerCta: "Scarica l'app",
     dismiss: "Chiudi",
     tooFast: "Stai inviando troppo in fretta, riprova tra un attimo",
@@ -683,6 +717,10 @@ const STRINGS = {
     bannerText: "Aprenda o idioma de {name} enquanto conversa.",
     showOriginal: "Ver original",
     hideOriginal: "Ocultar original",
+    learnTitle: "Aprender {language} também",
+    learnSub: "Veja as mensagens de {name} em {language}, com o seu idioma embaixo.",
+    learnOn: "Aprendendo {language}",
+    learnOff: "Aprender {language}",
     bannerCta: "Baixar o app",
     dismiss: "Fechar",
     tooFast: "Você está enviando rápido demais — tente de novo daqui a pouco",
@@ -730,6 +768,10 @@ const STRINGS = {
     bannerText: "チャットしながら{name}さんの言葉を覚えよう。",
     showOriginal: "原文を表示",
     hideOriginal: "原文を隠す",
+    learnTitle: "{language}も学ぶ",
+    learnSub: "{name}さんのメッセージを{language}で表示し、下にあなたの言語を添えます。",
+    learnOn: "{language}を学習中",
+    learnOff: "{language}を学ぶ",
     bannerCta: "アプリを入手",
     dismiss: "閉じる",
     tooFast: "送信が速すぎます。少し待ってからもう一度お試しください",
@@ -777,6 +819,10 @@ const STRINGS = {
     bannerText: "채팅하면서 {name}님의 언어를 배워 보세요.",
     showOriginal: "원문 보기",
     hideOriginal: "원문 숨기기",
+    learnTitle: "{language}도 배우기",
+    learnSub: "{name}님의 메시지를 {language}로 보여 주고, 아래에 내 언어를 함께 보여 줘요.",
+    learnOn: "{language} 배우는 중",
+    learnOff: "{language} 배우기",
     bannerCta: "앱 받기",
     dismiss: "닫기",
     tooFast: "너무 빨리 보내고 있어요. 잠시 후 다시 시도해 주세요",
@@ -824,6 +870,10 @@ const STRINGS = {
     bannerText: "边聊边学{name}的语言。",
     showOriginal: "查看原文",
     hideOriginal: "隐藏原文",
+    learnTitle: "同时学习{language}",
+    learnSub: "用{language}显示{name}的消息，下面附上你的语言。",
+    learnOn: "正在学{language}",
+    learnOff: "学{language}",
     bannerCta: "下载应用",
     dismiss: "关闭",
     tooFast: "发送太快了，请稍后再试",
@@ -871,6 +921,10 @@ const STRINGS = {
     bannerText: "邊聊邊學{name}的語言。",
     showOriginal: "顯示原文",
     hideOriginal: "隱藏原文",
+    learnTitle: "同時學習{language}",
+    learnSub: "用{language}顯示{name}的訊息，下面附上你的語言。",
+    learnOn: "正在學{language}",
+    learnOff: "學{language}",
     bannerCta: "下載 App",
     dismiss: "關閉",
     tooFast: "傳送太快了，請稍後再試",
@@ -918,6 +972,10 @@ const STRINGS = {
     bannerText: "Учите язык, на котором пишет {name}, прямо в чате.",
     showOriginal: "Показать оригинал",
     hideOriginal: "Скрыть оригинал",
+    learnTitle: "Учить ещё и {language}",
+    learnSub: "Сообщения от {name} — на языке «{language}», а под ними перевод на ваш язык.",
+    learnOn: "Учу: {language}",
+    learnOff: "Учить: {language}",
     bannerCta: "Скачать",
     dismiss: "Закрыть",
     tooFast: "Слишком быстро — попробуй ещё раз через минутку",
@@ -965,6 +1023,10 @@ const STRINGS = {
     bannerText: "{name} ile sohbet ederken onun dilini öğren.",
     showOriginal: "Orijinali göster",
     hideOriginal: "Orijinali gizle",
+    learnTitle: "{language} da öğren",
+    learnSub: "{name} kişisinin mesajlarını {language} göster, altında kendi dilin olsun.",
+    learnOn: "Öğreniyorum: {language}",
+    learnOff: "Öğren: {language}",
     bannerCta: "Uygulamayı indir",
     dismiss: "Kapat",
     tooFast: "Çok hızlı gönderiyorsun — biraz sonra tekrar dene",
@@ -1012,6 +1074,10 @@ const STRINGS = {
     bannerText: "Vừa chat vừa học ngôn ngữ của {name}.",
     showOriginal: "Xem bản gốc",
     hideOriginal: "Ẩn bản gốc",
+    learnTitle: "Học thêm {language}",
+    learnSub: "Xem tin nhắn của {name} bằng {language}, có ngôn ngữ của bạn ở bên dưới.",
+    learnOn: "Đang học {language}",
+    learnOff: "Học {language}",
     bannerCta: "Tải ứng dụng",
     dismiss: "Đóng",
     tooFast: "Bạn gửi nhanh quá — thử lại sau giây lát nhé",
@@ -1059,6 +1125,10 @@ const STRINGS = {
     bannerText: "Belajar bahasa {name} sambil mengobrol.",
     showOriginal: "Lihat teks asli",
     hideOriginal: "Sembunyikan teks asli",
+    learnTitle: "Belajar {language} juga",
+    learnSub: "Lihat pesan {name} dalam {language}, dengan bahasamu di bawahnya.",
+    learnOn: "Sedang belajar {language}",
+    learnOff: "Belajar {language}",
     bannerCta: "Unduh aplikasi",
     dismiss: "Tutup",
     tooFast: "Kamu mengirim terlalu cepat — coba lagi sebentar lagi",
@@ -1225,6 +1295,41 @@ function guessLanguage() {
   for (const l of list) { const m = findLang(l); if (m) return m.code; }
   return "en";
 }
+// A language's name in the page's current UI language ("inglés", "English").
+function langName(code) {
+  if (!code) return "";
+  try {
+    const n = new Intl.DisplayNames([S.locale || "en"], { type: "language" }).of(code === "iw" ? "he" : code);
+    if (n && n !== code) return n;
+  } catch { /* old browser — fall back to the catalog */ }
+  const l = findLang(code);
+  return (l && l.en) || code;
+}
+// Learning view: offered when the inviter's language differs from the guest's.
+function learnOffered(guestLang, inviterLang) {
+  const base = (c) => String(c || "").split("-")[0].toLowerCase();
+  return !!inviterLang && base(inviterLang) !== base(guestLang);
+}
+function renderLearnOpt() {
+  const box = $("learn-opt");
+  const inv = S.invite && S.invite.inviterLanguage;
+  const show = learnOffered(S.joinLang, inv);
+  box.hidden = !show;
+  if (!show) return;
+  const vars = { language: langName(inv), name: inviterLabel() };
+  $("learn-title").textContent = t("learnTitle", vars);
+  $("learn-sub").textContent = t("learnSub", vars);
+}
+function renderLearnPill() {
+  const pill = $("learn-pill");
+  const c = S.chat;
+  const show = !!c && learnOffered(c.language, c.inviterLanguage);
+  pill.hidden = !show;
+  if (!show) return;
+  pill.setAttribute("aria-pressed", c.learn ? "true" : "false");
+  pill.textContent = t(c.learn ? "learnOn" : "learnOff", { language: langName(c.inviterLanguage) });
+}
+
 function langDisplay(code) {
   const l = findLang(code);
   if (!l) return { main: code || "", sub: "" };
@@ -1312,6 +1417,7 @@ $("lang-list").addEventListener("click", (e) => {
   renderLangButton();
   const loc = pickUiLocale(S.joinLang);
   setLocale(loc || navigatorUiLocale());
+  renderLearnOpt();
   closeLangDialog();
 });
 $("lang-dialog").addEventListener("click", (e) => {
@@ -1399,6 +1505,27 @@ async function ensureSignedIn() {
   return cred.user;
 }
 
+// Every server call goes through here. The sign-in made at load can go
+// missing later on iPhone Safari (2026-10-16: the invite check was signed in,
+// the join 13 s later reached the server with no sign-in, ten times in a row
+// until a reload). So: confirm the sign-in and its token before each call, and
+// if the server still says "unauthenticated", refresh it and try once more.
+async function callGuest(name, data) {
+  const { auth } = S.fb;
+  const attempt = async () => {
+    const u = await ensureSignedIn();
+    try { await u.getIdToken(); } catch { /* the call itself will report it */ }
+    return S.fb.call(name)(data);
+  };
+  try {
+    return await attempt();
+  } catch (err) {
+    if (errCode(err) !== "unauthenticated") throw err;
+    try { if (auth.currentUser) await auth.currentUser.getIdToken(true); } catch { /* sign in again below */ }
+    return attempt();
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Boot / state machine:  loading → (state | join | chat)
 // ---------------------------------------------------------------------------
@@ -1421,7 +1548,7 @@ async function start() {
     }
     let res;
     try {
-      res = (await S.fb.call("peekGuestInvite")({ token: S.token })).data || {};
+      res = (await callGuest("peekGuestInvite", { token: S.token })).data || {};
     } catch (e) {
       const code = errCode(e);
       if (code === "not-found" || code === "invalid-argument") { showState("not-found"); return; }
@@ -1440,7 +1567,7 @@ async function routeInvite(res) {
   const status = res.status;
   if (status === "yours" && res.chatId) {
     const language = res.guestLanguage || store.get("lg_guest_lang") || null;
-    await enterChat({ chatId: res.chatId, inviterName: res.inviterName, language });
+    await enterChat({ chatId: res.chatId, inviterName: res.inviterName, language, inviterLanguage: res.inviterLanguage });
     return;
   }
   if (status === "open") { await showJoin(res); return; }
@@ -1456,6 +1583,7 @@ async function showJoin(res) {
   const name = inviterLabel();
   $("join-avatar").textContent = initial(name);
   renderLangButton();
+  renderLearnOpt();
   const input = $("name-input");
   if (!input.value && res.guestName) input.value = String(res.guestName).slice(0, MAX_NAME);
   document.title = name + " — Langiddy";
@@ -1492,15 +1620,21 @@ $("join-form").addEventListener("submit", async (e) => {
   btn.prepend(spin);
   btn.setAttribute("aria-busy", "true");
   try {
-    const res = (await S.fb.call("redeemGuestInvite")({ token: S.token, name, language })).data || {};
+    const res = (await callGuest("redeemGuestInvite", { token: S.token, name, language })).data || {};
     store.set("lg_guest_lang", language);
-    await enterChat({ chatId: res.chatId, inviterName: res.inviterName || (S.invite && S.invite.inviterName), language });
+    if (!$("learn-opt").hidden) store.set("lg_guest_learn:" + res.chatId, $("learn-input").checked ? "1" : "0");
+    await enterChat({
+      chatId: res.chatId,
+      inviterName: res.inviterName || (S.invite && S.invite.inviterName),
+      language,
+      inviterLanguage: res.inviterLanguage || (S.invite && S.invite.inviterLanguage),
+    });
   } catch (err) {
     const code = errCode(err);
     if (code === "failed-precondition") {
       // Used / expired / revoked — re-peek to show exactly which (or "yours" after a lost response).
       try {
-        const res = (await S.fb.call("peekGuestInvite")({ token: S.token })).data || {};
+        const res = (await callGuest("peekGuestInvite", { token: S.token })).data || {};
         S.invite = res;
         await routeInvite(res);
       } catch { showState("used"); }
@@ -1540,17 +1674,26 @@ const chatState = {
 };
 let localSeq = 0;
 
-async function enterChat({ chatId, inviterName, language }) {
+async function enterChat({ chatId, inviterName, language, inviterLanguage }) {
   if (!chatId) { showState("not-found"); return; }
   if (!S.languages.length) { try { await loadLanguages(); } catch { /* language list is cosmetic here */ } }
   const lang = (language && (findLang(language) || {}).code) || language || guessLanguage();
-  S.chat = { chatId, inviterName: inviterName || null, language: lang };
+  S.chat = {
+    chatId,
+    inviterName: inviterName || null,
+    language: lang,
+    inviterLanguage: inviterLanguage || null,
+    // The guest's choice, remembered per chat in this browser (a convenience,
+    // not account data). Off unless they opted in.
+    learn: store.get("lg_guest_learn:" + chatId) === "1",
+  };
   S.stateKind = null;
   setLocale(pickUiLocale(lang) || navigatorUiLocale());
 
   const name = inviterLabel();
   $("chat-name").textContent = name;
   $("chat-avatar").textContent = initial(name);
+  renderLearnPill();
   $("app-banner").hidden = store.get("lg_guest_banner_off:" + chatId) === "1";
   updateTitle();
   show("screen-chat");
@@ -1582,6 +1725,19 @@ function subscribe() {
     updateTitle();
   }, (err) => {
     console.warn("[guest] message listener stopped", errCode(err) || (err && err.message));
+    // Usually a lost sign-in (see callGuest): restore it and reconnect once,
+    // instead of switching the composer off for good.
+    if (!chatState.resubscribed) {
+      chatState.resubscribed = true;
+      ensureSignedIn()
+        .then((u) => u.getIdToken(true))
+        .then(() => subscribe())
+        .catch(() => {
+          chatState.canSend = false;
+          updateSendEnabled();
+        });
+      return;
+    }
     chatState.canSend = false;
     updateSendEnabled();
     const pill = $("conn-pill");
@@ -1645,6 +1801,25 @@ function messageView(m, uid, lang) {
   const side = m.sentBy === uid ? "me" : "them";
   const kind = m.kind;
   if (kind && kind !== "text") return { side, kind: "sys", text: t("media") };
+  const learn = S.chat && S.chat.learn && learnOffered(lang, S.chat.inviterLanguage);
+  if (learn) {
+    // Langiddy's learning layout: the language they're learning on top, their
+    // own language underneath — for the inviter's messages AND their own (how
+    // the inviter reads what they wrote).
+    const target = S.chat.inviterLanguage;
+    const trs = m.translationsByLang || {};
+    const own = String(m.text ?? "");
+    const pending = TRANSLATING_STATES.has(m.translationState);
+    if (side === "me") {
+      const top = trs[target];
+      if (typeof top === "string" && top.trim()) return { side, kind: "text", text: top, sub: own, subOpen: true };
+      return { side, kind: "text", text: own, sub: pending ? t("translating") : null, subOpen: true, subPending: pending };
+    }
+    const top = (typeof trs[target] === "string" && trs[target].trim()) ? trs[target] : own;
+    const mine = trs[lang];
+    if (typeof mine === "string" && mine.trim() && mine.trim() !== top.trim()) return { side, kind: "text", text: top, sub: mine, subOpen: true };
+    return { side, kind: "text", text: top, sub: pending ? t("translating") : null, subOpen: true, subPending: pending };
+  }
   if (side === "me") return { side, kind: "text", text: String(m.text ?? "") };
   const tr = m.translationsByLang && m.translationsByLang[lang];
   if (typeof tr === "string" && tr.trim()) {
@@ -1692,7 +1867,7 @@ function renderMessages(forceBottom = false) {
     e.cont = !!(prev && prev.side === e.side);
     e.contNext = !!(next && next.side === e.side);
     let row = chatState.els.get(e.key);
-    const sig = [e.side, e.kind, e.text, e.status, e.cont, e.contNext, S.locale, e.original || "", e.origOpen ? 1 : 0].join("\u0001");
+    const sig = [e.side, e.kind, e.text, e.status, e.cont, e.contNext, S.locale, e.original || "", e.origOpen ? 1 : 0, e.sub || "", e.subPending ? 1 : 0].join("\u0001");
     if (!row) { row = document.createElement("div"); chatState.els.set(e.key, row); }
     if (row._sig !== sig) { paintRow(row, e); row._sig = sig; }
     live.add(e.key);
@@ -1726,6 +1901,13 @@ function paintRow(row, e) {
     b.appendChild(s);
   } else {
     b.textContent = e.text;
+    if (e.sub) {
+      const o = document.createElement("span");
+      o.className = e.subPending ? "orig shimmer" : "orig";
+      o.dir = "auto";
+      o.textContent = e.sub;
+      b.appendChild(o);
+    }
     if (e.original && e.origOpen) {
       const o = document.createElement("span");
       o.className = "orig";
@@ -1782,6 +1964,14 @@ $("messages").addEventListener("keydown", (e) => {
   }
 });
 
+$("learn-pill").addEventListener("click", () => {
+  if (!S.chat) return;
+  S.chat.learn = !S.chat.learn;
+  store.set("lg_guest_learn:" + S.chat.chatId, S.chat.learn ? "1" : "0");
+  renderLearnPill();
+  renderMessages();
+});
+
 // Composer
 const input = $("msg-input");
 const sendBtn = $("send-btn");
@@ -1831,7 +2021,7 @@ function retrySend(localId) {
 
 async function doSend(p) {
   try {
-    const res = (await S.fb.call("sendGuestMessage")({ chatId: S.chat.chatId, text: p.text })).data || {};
+    const res = (await callGuest("sendGuestMessage", { chatId: S.chat.chatId, text: p.text })).data || {};
     p.status = "sent";
     if (res.messageId) p.messageId = String(res.messageId);
   } catch (err) {
