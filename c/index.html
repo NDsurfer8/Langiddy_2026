@@ -218,8 +218,15 @@
     box-shadow: var(--shadow-card); font-size: .9rem;
   }
   .app-banner .mark { width: 32px; height: 32px; }
-  .app-banner p { flex: 1; min-width: 0; color: var(--text-soft); line-height: 1.35; }
+  .app-banner { flex-wrap: wrap; align-items: flex-start; position: relative; padding-right: 40px; }
+  .app-banner #banner-close { position: absolute; top: 4px; right: 4px; }
+  .app-banner .banner-copy { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .app-banner .banner-title { font-weight: 700; color: var(--text); line-height: 1.3; }
+  .app-banner p { min-width: 0; color: var(--text-soft); line-height: 1.35; }
+  .app-banner .banner-actions { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-left: 42px; }
   .app-banner .get { flex: none; font-weight: 700; color: var(--orange); text-decoration: none; padding: 8px 6px; }
+  .btn-google { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; white-space: nowrap; flex: none; border-radius: 999px; border: 1px solid #DADCE0; background: #FFFFFF; color: #1F1F1F; font-weight: 600; font-size: .88rem; cursor: pointer; }
+  .btn-google:disabled { opacity: .6; }
   .app-banner .icon-btn { width: 36px; height: 36px; background: transparent; color: var(--text-faint); }
 
   .messages {
@@ -334,7 +341,7 @@
       <h1 id="state-title"></h1>
       <p id="state-body"></p>
       <button type="button" class="btn btn-primary" id="state-retry" data-i18n="retry" hidden>Try again</button>
-      <a class="btn btn-primary" id="state-get" href="https://langiddy.com" data-i18n="getLangiddy">Get Langiddy</a>
+      <a class="btn btn-primary" id="state-get" href="https://langiddy.com" target="_blank" rel="noopener" data-i18n="getLangiddy">Get Langiddy</a>
     </div>
   </section>
 
@@ -388,8 +395,14 @@
 
     <div class="app-banner" id="app-banner" hidden>
       <svg class="mark" aria-hidden="true"><use href="#logo" /></svg>
-      <p id="banner-text"></p>
-      <a class="get" href="https://langiddy.com" target="_blank" rel="noopener" data-i18n="bannerCta">Get the app</a>
+      <div class="banner-copy"><p class="banner-title" id="banner-title"></p><p id="banner-text"></p></div>
+      <div class="banner-actions">
+        <button type="button" class="btn-google" id="keep-google">
+          <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          <span id="keep-google-text"></span>
+        </button>
+        <a class="get" id="banner-get" href="https://langiddy.com" target="_blank" rel="noopener" data-i18n="bannerCta">Get the app</a>
+      </div>
       <button type="button" class="icon-btn" id="banner-close" data-i18n-aria="dismiss" aria-label="Dismiss">✕</button>
     </div>
 
@@ -459,7 +472,13 @@ const STRINGS = {
     empty: "Say hi to {name}! They'll read it in their language.",
     sending: "Sending…",
     failed: "Not sent · Tap to retry",
-    bannerText: "Learn {name}'s language as you chat.",
+    keepTitle: "Keep your chat with {name}",
+    keepSub: "Continue with Google — when you get Langiddy, this chat is already there.",
+    keepGoogle: "Continue with Google",
+    keptTitle: "Your chat is saved",
+    keptSub: "Get Langiddy and sign in with Google to keep chatting with {name}.",
+    keepAlready: "This Google account already has Langiddy. Open the app to chat there.",
+    keepFailed: "Couldn't connect to Google. Please try again.",
     showOriginal: "Show original",
     hideOriginal: "Hide original",
     learnTitle: "Also learn {language}",
@@ -510,7 +529,13 @@ const STRINGS = {
     empty: "¡Saluda a {name}! Lo leerá en su idioma.",
     sending: "Enviando…",
     failed: "No enviado · Toca para reintentar",
-    bannerText: "Aprende el idioma de {name} mientras chateas.",
+    keepTitle: "Guarda tu chat con {name}",
+    keepSub: "Continúa con Google: cuando tengas Langiddy, este chat ya estará ahí.",
+    keepGoogle: "Continuar con Google",
+    keptTitle: "Tu chat está guardado",
+    keptSub: "Descarga Langiddy e inicia sesión con Google para seguir chateando con {name}.",
+    keepAlready: "Esta cuenta de Google ya tiene Langiddy. Abre la app para chatear allí.",
+    keepFailed: "No se pudo conectar con Google. Inténtalo de nuevo.",
     showOriginal: "Mostrar original",
     hideOriginal: "Ocultar original",
     learnTitle: "Aprender también {language}",
@@ -561,7 +586,13 @@ const STRINGS = {
     empty: "Dis bonjour à {name} ! Ton message sera traduit dans sa langue.",
     sending: "Envoi…",
     failed: "Non envoyé · Touche pour réessayer",
-    bannerText: "Apprends la langue de {name} en discutant.",
+    keepTitle: "Garde ta conversation avec {name}",
+    keepSub: "Continue avec Google : quand tu installeras Langiddy, cette conversation y sera déjà.",
+    keepGoogle: "Continuer avec Google",
+    keptTitle: "Ta conversation est enregistrée",
+    keptSub: "Installe Langiddy et connecte-toi avec Google pour continuer à discuter avec {name}.",
+    keepAlready: "Ce compte Google a déjà Langiddy. Ouvre l'app pour discuter là-bas.",
+    keepFailed: "Connexion à Google impossible. Réessaie.",
     showOriginal: "Voir l'original",
     hideOriginal: "Masquer l'original",
     learnTitle: "Apprendre aussi : {language}",
@@ -612,7 +643,13 @@ const STRINGS = {
     empty: "Sag {name} Hallo! Die Nachricht kommt übersetzt an.",
     sending: "Wird gesendet…",
     failed: "Nicht gesendet · Tippen zum Wiederholen",
-    bannerText: "Lerne beim Chatten die Sprache von {name}.",
+    keepTitle: "Behalte deinen Chat mit {name}",
+    keepSub: "Mit Google fortfahren – wenn du Langiddy installierst, ist dieser Chat schon da.",
+    keepGoogle: "Mit Google fortfahren",
+    keptTitle: "Dein Chat ist gespeichert",
+    keptSub: "Hol dir Langiddy und melde dich mit Google an, um weiter mit {name} zu chatten.",
+    keepAlready: "Dieses Google-Konto hat schon Langiddy. Öffne die App, um dort zu chatten.",
+    keepFailed: "Verbindung zu Google fehlgeschlagen. Bitte versuch es noch einmal.",
     showOriginal: "Original anzeigen",
     hideOriginal: "Original ausblenden",
     learnTitle: "Auch {language} lernen",
@@ -663,7 +700,13 @@ const STRINGS = {
     empty: "Saluta {name}! Leggerà il messaggio nella sua lingua.",
     sending: "Invio…",
     failed: "Non inviato · Tocca per riprovare",
-    bannerText: "Impara la lingua di {name} mentre chatti.",
+    keepTitle: "Conserva la chat con {name}",
+    keepSub: "Continua con Google: quando avrai Langiddy, questa chat sarà già lì.",
+    keepGoogle: "Continua con Google",
+    keptTitle: "La tua chat è salvata",
+    keptSub: "Scarica Langiddy e accedi con Google per continuare a chattare con {name}.",
+    keepAlready: "Questo account Google ha già Langiddy. Apri l'app per chattare lì.",
+    keepFailed: "Impossibile collegarsi a Google. Riprova.",
     showOriginal: "Mostra originale",
     hideOriginal: "Nascondi originale",
     learnTitle: "Impara anche {language}",
@@ -714,7 +757,13 @@ const STRINGS = {
     empty: "Diga oi para {name}! A mensagem vai chegar traduzida.",
     sending: "Enviando…",
     failed: "Não enviada · Toque para tentar de novo",
-    bannerText: "Aprenda o idioma de {name} enquanto conversa.",
+    keepTitle: "Guarde sua conversa com {name}",
+    keepSub: "Continue com o Google: quando você baixar o Langiddy, esta conversa já vai estar lá.",
+    keepGoogle: "Continuar com o Google",
+    keptTitle: "Sua conversa está salva",
+    keptSub: "Baixe o Langiddy e entre com o Google para continuar conversando com {name}.",
+    keepAlready: "Esta conta do Google já tem Langiddy. Abra o app para conversar por lá.",
+    keepFailed: "Não foi possível conectar ao Google. Tente de novo.",
     showOriginal: "Ver original",
     hideOriginal: "Ocultar original",
     learnTitle: "Aprender {language} também",
@@ -765,7 +814,13 @@ const STRINGS = {
     empty: "{name}にあいさつしてみましょう！相手の言語に翻訳されて届きます。",
     sending: "送信中…",
     failed: "送信できませんでした · タップして再送",
-    bannerText: "チャットしながら{name}さんの言葉を覚えよう。",
+    keepTitle: "{name}さんとのチャットを残す",
+    keepSub: "Googleで続けると、Langiddyアプリを入れたときにこのチャットがそのまま入っています。",
+    keepGoogle: "Googleで続ける",
+    keptTitle: "チャットを保存しました",
+    keptSub: "Langiddyを入れてGoogleでログインすると、{name}さんとのチャットを続けられます。",
+    keepAlready: "このGoogleアカウントにはすでにLangiddyがあります。アプリを開いてチャットしてください。",
+    keepFailed: "Googleに接続できませんでした。もう一度お試しください。",
     showOriginal: "原文を表示",
     hideOriginal: "原文を隠す",
     learnTitle: "{language}も学ぶ",
@@ -816,7 +871,13 @@ const STRINGS = {
     empty: "{name}님에게 인사해 보세요! 상대방 언어로 번역돼서 전달돼요.",
     sending: "보내는 중…",
     failed: "전송 실패 · 탭하여 다시 시도",
-    bannerText: "채팅하면서 {name}님의 언어를 배워 보세요.",
+    keepTitle: "{name}님과의 채팅 보관하기",
+    keepSub: "Google로 계속하면 Langiddy 앱을 설치했을 때 이 채팅이 그대로 있어요.",
+    keepGoogle: "Google로 계속하기",
+    keptTitle: "채팅이 저장됐어요",
+    keptSub: "Langiddy를 설치하고 Google로 로그인하면 {name}님과 계속 채팅할 수 있어요.",
+    keepAlready: "이 Google 계정에는 이미 Langiddy가 있어요. 앱을 열어 채팅하세요.",
+    keepFailed: "Google에 연결하지 못했어요. 다시 시도해 주세요.",
     showOriginal: "원문 보기",
     hideOriginal: "원문 숨기기",
     learnTitle: "{language}도 배우기",
@@ -867,7 +928,13 @@ const STRINGS = {
     empty: "和 {name} 打个招呼吧！对方会看到翻译成自己语言的消息。",
     sending: "发送中…",
     failed: "未发送 · 点按重试",
-    bannerText: "边聊边学{name}的语言。",
+    keepTitle: "保留你和{name}的聊天",
+    keepSub: "用 Google 继续：装好 Langiddy 后，这段聊天已经在里面了。",
+    keepGoogle: "使用 Google 继续",
+    keptTitle: "聊天已保存",
+    keptSub: "下载 Langiddy 并用 Google 登录，就能继续和{name}聊天。",
+    keepAlready: "这个 Google 账号已经有 Langiddy 了。打开应用在那里聊天吧。",
+    keepFailed: "无法连接 Google，请重试。",
     showOriginal: "查看原文",
     hideOriginal: "隐藏原文",
     learnTitle: "同时学习{language}",
@@ -918,7 +985,13 @@ const STRINGS = {
     empty: "跟 {name} 打聲招呼吧！對方會看到翻譯成自己語言的訊息。",
     sending: "傳送中…",
     failed: "未傳送 · 點一下重試",
-    bannerText: "邊聊邊學{name}的語言。",
+    keepTitle: "保留你和{name}的聊天",
+    keepSub: "用 Google 繼續：裝好 Langiddy 後，這段聊天已經在裡面了。",
+    keepGoogle: "使用 Google 繼續",
+    keptTitle: "聊天已儲存",
+    keptSub: "下載 Langiddy 並用 Google 登入，就能繼續和{name}聊天。",
+    keepAlready: "這個 Google 帳號已經有 Langiddy 了。開啟 App 在那裡聊天吧。",
+    keepFailed: "無法連線到 Google，請再試一次。",
     showOriginal: "顯示原文",
     hideOriginal: "隱藏原文",
     learnTitle: "同時學習{language}",
@@ -969,7 +1042,13 @@ const STRINGS = {
     empty: "Напиши первое сообщение — {name} прочитает его на своём языке.",
     sending: "Отправка…",
     failed: "Не отправлено · Нажми, чтобы повторить",
-    bannerText: "Учите язык, на котором пишет {name}, прямо в чате.",
+    keepTitle: "Сохраните переписку с {name}",
+    keepSub: "Продолжите с Google — когда установите Langiddy, переписка уже будет там.",
+    keepGoogle: "Продолжить с Google",
+    keptTitle: "Переписка сохранена",
+    keptSub: "Установите Langiddy и войдите через Google, чтобы продолжить общение с {name}.",
+    keepAlready: "У этого аккаунта Google уже есть Langiddy. Откройте приложение, чтобы писать там.",
+    keepFailed: "Не удалось подключиться к Google. Попробуйте ещё раз.",
     showOriginal: "Показать оригинал",
     hideOriginal: "Скрыть оригинал",
     learnTitle: "Учить ещё и {language}",
@@ -1020,7 +1099,13 @@ const STRINGS = {
     empty: "İlk mesajını yaz — {name} kendi dilinde okuyacak.",
     sending: "Gönderiliyor…",
     failed: "Gönderilemedi · Tekrar denemek için dokun",
-    bannerText: "{name} ile sohbet ederken onun dilini öğren.",
+    keepTitle: "{name} ile sohbetini sakla",
+    keepSub: "Google ile devam et — Langiddy'yi yüklediğinde bu sohbet orada olacak.",
+    keepGoogle: "Google ile devam et",
+    keptTitle: "Sohbetin kaydedildi",
+    keptSub: "{name} ile sohbete devam etmek için Langiddy'yi indir ve Google ile giriş yap.",
+    keepAlready: "Bu Google hesabında zaten Langiddy var. Sohbet etmek için uygulamayı aç.",
+    keepFailed: "Google'a bağlanılamadı. Lütfen tekrar dene.",
     showOriginal: "Orijinali göster",
     hideOriginal: "Orijinali gizle",
     learnTitle: "{language} da öğren",
@@ -1071,7 +1156,13 @@ const STRINGS = {
     empty: "Chào {name} đi! Tin nhắn sẽ được dịch sang ngôn ngữ của họ.",
     sending: "Đang gửi…",
     failed: "Chưa gửi được · Chạm để thử lại",
-    bannerText: "Vừa chat vừa học ngôn ngữ của {name}.",
+    keepTitle: "Giữ lại cuộc trò chuyện với {name}",
+    keepSub: "Tiếp tục với Google — khi bạn cài Langiddy, cuộc trò chuyện này đã có sẵn ở đó.",
+    keepGoogle: "Tiếp tục với Google",
+    keptTitle: "Đã lưu cuộc trò chuyện",
+    keptSub: "Tải Langiddy và đăng nhập bằng Google để tiếp tục trò chuyện với {name}.",
+    keepAlready: "Tài khoản Google này đã có Langiddy. Hãy mở ứng dụng để trò chuyện ở đó.",
+    keepFailed: "Không kết nối được với Google. Vui lòng thử lại.",
     showOriginal: "Xem bản gốc",
     hideOriginal: "Ẩn bản gốc",
     learnTitle: "Học thêm {language}",
@@ -1122,7 +1213,13 @@ const STRINGS = {
     empty: "Sapa {name}! Pesanmu akan dibaca dalam bahasanya.",
     sending: "Mengirim…",
     failed: "Belum terkirim · Ketuk untuk coba lagi",
-    bannerText: "Belajar bahasa {name} sambil mengobrol.",
+    keepTitle: "Simpan obrolanmu dengan {name}",
+    keepSub: "Lanjutkan dengan Google — saat kamu memasang Langiddy, obrolan ini sudah ada di sana.",
+    keepGoogle: "Lanjutkan dengan Google",
+    keptTitle: "Obrolanmu tersimpan",
+    keptSub: "Pasang Langiddy dan masuk dengan Google untuk terus mengobrol dengan {name}.",
+    keepAlready: "Akun Google ini sudah punya Langiddy. Buka aplikasinya untuk mengobrol di sana.",
+    keepFailed: "Tidak bisa terhubung ke Google. Coba lagi.",
     showOriginal: "Lihat teks asli",
     hideOriginal: "Sembunyikan teks asli",
     learnTitle: "Belajar {language} juga",
@@ -1155,6 +1252,17 @@ const FIREBASE_CONFIG = {
   appId: "1:654123213636:web:4f4ee3604c81562db06d11",
 };
 const APP_URL = "https://langiddy.com";
+// "Get the app" goes straight to the right store; desktops get the website.
+const STORE_URLS = {
+  ios: "https://apps.apple.com/app/id1672904077",
+  android: "https://play.google.com/store/apps/details?id=com.ndsurf888.langgiddyy",
+};
+function storeUrl() {
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return STORE_URLS.ios;
+  if (/Android/.test(ua)) return STORE_URLS.android;
+  return APP_URL;
+}
 const MAX_TEXT = 2000;
 const MAX_NAME = 40;
 const LANG_ALIASES = { he: "iw", jv: "jw", nb: "no", nn: "no", fil: "tl", zh: "zh-CN" };
@@ -1429,7 +1537,7 @@ function refreshNamedStrings() {
   const name = inviterLabel();
   $("join-title").textContent = t("joinTitle", { name });
   $("join-sub").textContent = t("joinSub", { name });
-  $("banner-text").textContent = t("bannerText", { name });
+  renderBanner();
   $("empty-hint").textContent = t("empty", { name });
   if (S.stateKind) renderState(S.stateKind);
   if (S.chat) renderMessages();
@@ -1461,6 +1569,8 @@ function showState(kind) {
   show("screen-state");
 }
 $("state-retry").addEventListener("click", () => { S.stateKind = null; start(); });
+$("state-get").href = storeUrl();
+$("banner-get").href = storeUrl();
 
 // ---------------------------------------------------------------------------
 // Firebase
@@ -1695,6 +1805,7 @@ async function enterChat({ chatId, inviterName, language, inviterLanguage }) {
   $("chat-avatar").textContent = initial(name);
   renderLearnPill();
   $("app-banner").hidden = store.get("lg_guest_banner_off:" + chatId) === "1";
+  renderBanner();
   updateTitle();
   show("screen-chat");
   subscribe();
@@ -1970,6 +2081,44 @@ $("learn-pill").addEventListener("click", () => {
   store.set("lg_guest_learn:" + S.chat.chatId, S.chat.learn ? "1" : "0");
   renderLearnPill();
   renderMessages();
+});
+
+// ---------------------------------------------------------------------------
+// Keep this chat: link the anonymous guest to Google. Same Firebase account,
+// so signing in to the Langiddy app with that Google account opens THIS chat.
+// ---------------------------------------------------------------------------
+function chatKept() {
+  const u = S.fb && S.fb.auth && S.fb.auth.currentUser;
+  return !!(u && (u.providerData || []).some((p) => p.providerId === "google.com"));
+}
+function renderBanner() {
+  const name = inviterLabel();
+  const kept = chatKept();
+  $("banner-title").textContent = t(kept ? "keptTitle" : "keepTitle", { name });
+  $("banner-text").textContent = t(kept ? "keptSub" : "keepSub", { name });
+  $("keep-google").hidden = kept;
+  $("keep-google-text").textContent = t("keepGoogle");
+}
+let keeping = false;
+$("keep-google").addEventListener("click", async () => {
+  if (keeping || !S.fb || !S.fb.auth.currentUser) return;
+  keeping = true;
+  $("keep-google").disabled = true;
+  const { auth, authM } = S.fb;
+  try {
+    await authM.linkWithPopup(auth.currentUser, new authM.GoogleAuthProvider());
+    await auth.currentUser.getIdToken(true); // the next calls carry the new sign-in
+    $("app-banner").hidden = false;
+    renderBanner();
+    toast(t("keptTitle", { name: inviterLabel() }));
+  } catch (err) {
+    const code = String((err && err.code) || "");
+    if (code === "auth/credential-already-in-use" || code === "auth/email-already-in-use") toast(t("keepAlready"));
+    else if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") toast(t("keepFailed"));
+  } finally {
+    keeping = false;
+    $("keep-google").disabled = false;
+  }
 });
 
 // Composer
